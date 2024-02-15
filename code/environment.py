@@ -25,11 +25,7 @@ class MountainCar(object):
             self.pos = 0.6
         else:
             self.pos = max(self.pos + self.vel,-1.2)
-<<<<<<< HEAD
-    
-=======
             
->>>>>>> a16f448e678d966f66d149fe1210d344202bebfa
         if self.h == self.horizon-1:
             self.done = True
             if self.pos < 0.6:
