@@ -2,9 +2,10 @@ import numpy as np
 
 
 class MountainCar(object):
-    def __init__(self, horizon):
-        self.horizon = horizon
-        self.means = np.array([0, 1.0])
+    def __init__(self, horizon_sec=200., dt_sec=1.0):
+        self.horizon_sec = horizon_sec
+        self.dt_sec = dt_sec
+        self.means = np.array([0,1.0])
         self.reset()
 
     def reset(self):
@@ -13,27 +14,26 @@ class MountainCar(object):
         self.pos = -0.5
         self.vel = 0.0
         self.done = False
-        self.h = -1
+        self.h = 0
         return [self.pos, self.vel]
-
+    
     def step(self, action):
-        action = [-1, 0, 1][action]
-        self.h += 1
-        self.vel = max(
-            min(self.vel + 0.001 * action + -0.0025 * np.cos(3 * self.pos), 0.07), -0.07
-        )
-        reward = 0
-
-        if self.pos > 0.6:
+        self.h += self.dt_sec
+        self.vel = max(min(
+            (self.vel + self.dt_sec *(0.001 * action + -0.0025 * np.cos(3 * self.pos))),
+            0.07),-0.07)
+        cost = 0
+        
+        if self.pos >= 0.6:
             # At goal; stay there.
             self.pos = 0.6
             reward = 0.0
         else:
             # Not at goal; move.
-            self.pos = max(self.pos + self.vel, -1.2)
+            self.pos = max(self.pos + self.dt_sec * self.vel, -1.2)
             reward = -1.0
             
-        if self.h == self.horizon-1:
+        if self.h + self.dt_sec > self.horizon_sec:
             self.done = True
             
         return reward, np.array([self.pos, self.vel]), self.h, self.done
@@ -66,7 +66,7 @@ class MountainCar(object):
         pos = np.where(pos <= -1.2, -1.2, pos)
         pos = np.where(pos >= 0.6, 0.6, pos)
         
-        if self.h != self.horizon - 1:
+        if self.h != self.horizon_sec - 1:
             s_ = np.array([pos,vel])
             return cost, s_
         else:
@@ -98,7 +98,7 @@ class MountainCar(object):
         pos = np.where(pos <= -1.2, -1.2, pos)
         pos = np.where(pos >= 0.6, 0.6, pos)
         
-        if self.h != self.horizon - 1:
+        if self.h != self.horizon_sec - 1:
             s_ = np.array([pos,vel])
             return cost, s_
         else:
