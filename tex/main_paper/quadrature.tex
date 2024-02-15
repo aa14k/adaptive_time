@@ -1,0 +1,9 @@
+\section{Adaptive Quadrature}
+Adaptive quadrature refers to a family of algorithms that use small step sizes in the parts of the domain of integration where it is hard to get good accuracy and large step sizes in the parts of the domain of integration where it is easier to get good accuracy.
+
+We illustrate this idea by using Simpson's rule to integrate $\int_{a}^b f(x)dx$ with error tolerance $\varepsilon$. 
+
+\paragraph{Step 1} Start by applying Simpson's rule, combined with Richardson extrapolation to get an error estimate, with the largest possible step size $h$. Namely, $h= (b-a)/2$, compute
+\begin{equation}
+    f(a), \quad f\left(a+\frac{h}{2}\right), \quad f(a+h) = f\left(\frac{a+b}{2}\right), \quad f\left(a+\frac{3h}{2}\right), \quad f(a+2h) = f(b)\,.
+\end{equation}

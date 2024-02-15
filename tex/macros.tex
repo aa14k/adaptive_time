@@ -1,0 +1,227 @@
+% Definitions of handy macros can go here
+\def\Re{\mathbb{R}}
+\def\natural{\mathbb{N}}
+\def\Real{\mathds{R}}
+\def\Repart{\mathrm{Re}}
+\def\Nat{{\rm I\kern\pIR N}}
+\def\argmax{\mathop{\rm arg\,max}}
+\def\argmin{\mathop{\rm arg\,min}}
+\def\liminf{\mathop{\rm lim\,inf}}
+\def\log{\mathop{\rm log}}
+\def\Mean{{\bf Mean}}
+\def\Var{{\bf Var}}
+\def\Cov{{\bf Cov}}
+\def\exptE{{\bf E}}
+\newcommand{\EE}[1]{\exptE\left[#1\right]}
+\def\diag{\mathop{\rm diag}}
+\newcommand{\defeq}{\overset{\text{\tiny def}}{=}}
+\newcommand{\mytodo}[1]{{\color{blue} #1}}
+
+\def\setC{\mathbb{C}}
+
+\def\A{{\mathcal{A}}}
+\def\B{{\mathcal{B}}}
+\def\C{{\mathcal{C}}}
+\def\D{{\mathcal{D}}}
+\def\E{{\mathcal{E}}}
+\def\F{{\mathcal{F}}}
+\def\G{{\mathcal{G}}}
+\def\H{{\mathcal{H}}}
+\def\I{{\mathcal{I}}}
+\def\J{{\mathcal{J}}}
+\def\L{{\mathcal{L}}}
+\def\M{{\mathcal{M}}}
+\def\N{{\mathcal{N}}}
+\def\O{{\mathcal{O}}}
+\def\P{{\mathcal{P}}}
+\def\Q{{\mathcal{Q}}}
+\def\R{{\mathcal{R}}}
+\def\S{{\mathcal{S}}}
+\def\T{{\mathcal{T}}}
+\def\U{{\mathcal{U}}}
+\def\V{{\mathcal{V}}}
+\def\W{{\mathcal{W}}}
+\def\X{{\mathcal{X}}}
+\def\Z{{\mathcal{Z}}}
+
+\newcommand{\States}{\S}
+\newcommand{\Actions}{\A}
+\newcommand{\Observations}{\O}
+\newcommand{\numoutputs}{p}
+\newcommand{\numlayers}{k}
+\newcommand{\layersize}{n}
+\newcommand{\inputx}{\vecx}
+\newcommand{\inputspace}{\mathcal{X}}
+\newcommand{\outputy}{y}
+\newcommand{\outputspace}{\mathcal{Y}}
+\newcommand{\pioutput}{\pi_{\numlayers+1}}
+\newcommand{\params}{ {\boldsymbol{\theta}} }
+\newcommand{\errfcn}{\text{err}}
+
+\def\vecalpha{{\boldsymbol{\alpha}}}
+\def\vectheta{{\boldsymbol{\theta}}}
+\def\vecpi{{\boldsymbol{\pi}}}
+\def\vecpsi{{\boldsymbol{\psi}}}
+\def\vecphi{{\boldsymbol{\phi}}}
+\def\vecmu{{\boldsymbol{\mu}}}
+\def\vecdelta{{\boldsymbol{\delta}}}
+\def\vec0{{\boldsymbol{0}}}
+\def\vecb{{\boldsymbol{b}}}
+\def\vece{{\boldsymbol{e}}}
+\def\vecf{{\boldsymbol{f}}}
+\def\veck{{\boldsymbol{k}}}
+\def\vecp{{\boldsymbol{p}}}
+\def\vecq{{\boldsymbol{q}}}
+\def\vecr{{\boldsymbol{r}}}
+\def\vecu{{\boldsymbol{u}}}
+\def\vecv{{\boldsymbol{v}}}
+\def\vecw{{\boldsymbol{w}}}
+\def\vecx{{\boldsymbol{x}}}
+\def\vech{{\boldsymbol{h}}}
+\def\vecy{{\boldsymbol{y}}}
+\def\vecz{{\boldsymbol{z}}}
+\def\veca{{\boldsymbol{a}}}
+\def\veco{{\boldsymbol{o}}}
+
+\def\matSigma{{\boldsymbol{\Sigma}}}
+\def\matLambda{{\boldsymbol{\Lambda}}}
+\def\matA{{\boldsymbol{A}}}
+\def\hmatA{{\boldsymbol{\hat{A}}}}
+\def\matC{{\boldsymbol{C}}}
+\def\matD{{\boldsymbol{D}}}
+\def\matF{{\boldsymbol{F}}}
+\def\matG{{\boldsymbol{G}}}
+\def\matH{{\boldsymbol{H}}}
+\def\matI{{\boldsymbol{I}}}
+\def\matK{{\boldsymbol{K}}}
+\def\matP{{\boldsymbol{P}}}
+\def\matU{{\boldsymbol{U}}}
+\def\matX{{\boldsymbol{X}}}
+\def\matY{{\boldsymbol{Y}}}
+\def\matZ{{\boldsymbol{Z}}}
+
+\newcommand{\ovs}{\overline{s}}
+\newcommand{\ovr}{\overline{r}}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary} %[thm]
+\newtheorem{fact}[thm]{Fact}
+\newtheorem{asmp}[thm]{Assumption}
+\newcommand{\lambdamin}{\lambda_{\min}}
+\newcommand{\Rsa}{R(s,a)}
+\newcommand{\lambdamax}{\lambda_{\max}}
+\newcommand{\sigmamin}{\sigma_{\min}}
+\newcommand{\sigmamax}{\sigma_{\max}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\beqa}{\begin{eqnarray}}
+\newcommand{\eeqa}{\end{eqnarray}}
+\newcommand{\beqan}{\begin{eqnarray*}}
+\newcommand{\eeqan}{\end{eqnarray*}}
+\newcommand{\ben}{\begin{eqnarray*}}
+\newcommand{\een}{\end{eqnarray*}}
+\def\real{\mathbb{R}}
+
+\newcommand{\RealPart}{\mathrm{Re}}
+\newcommand{\half}{{\frac12}}
+\newcommand\norm[1]{\|#1\|_2}
+\def\tr{^\top\!}
+\def\ph{{\bm\phi}}
+\def\th{{\bm\theta}}
+% \def\vece{{\boldsymbol{\bf e}}}
+% \def\vecw{{\boldsymbol{\bf w}}}
+% \def\vecz{{\boldsymbol{\bf z}}}
+% \def\vecx{{\boldsymbol{\bf x}}}
+% \def\vech{{\boldsymbol{\bf h}}}
+\renewcommand{\EE}[2]{\mathbb{E}_{#1\!\!}\left[#2\right]}
+\newcommand{\EEb}[2]{\mathbb{E}_{#1\!}\bigl[#2\bigr]}
+\newcommand{\hatEE}[2]{\hat{\mathbb{E}}_{#1\!\!}\left[#2\right]}
+\newcommand{\EEpi}[1]{\EE{\pi}{#1}}
+\newcommand{\EEmu}[1]{\EE{\mu}{#1}}
+\newcommand{\CEE}[3]{\EE{#1}{{#2}~\middle\vert~{#3}}}
+\renewcommand{\CEE}[3]{\EE{#1}{{#2}\mid{#3}}}
+\def\CE#1#2{\CEE{\,}{#1}{#2}}
+\def\CEb#1#2{\CEE{b}{#1}{#2}}
+\def\CEpi#1#2{\CEE{\pi}{#1}{#2}}
+\def\CEpip#1#2{\CEE{\pi'}{#1}{#2}}
+\def\CEpistar#1#2{\CEE{\pi_*}{#1}{#2}}
+\def\hatCE#1#2{\hatEE{\!}{{#1}\mid{#2}}}
+\def\E#1{\EE{\,}{#1}}
+\def\Epi#1{\EE{\pi}{#1}}
+\def\Emu#1{\EE{\mu}{#1}}
+\def\Eb#1{\EE{b}{#1}}
+\def\Epip#1{\EE{\pi'}{#1}}
+\def\Ea#1{\EE{a}{#1}}
+% \def\CP#1#2{\Pr{#1\mid#2}}
+% \def\Pr#1{{{\rm Pr\!}\left\{#1\right\}}}
+\def\Ppi#1{{{\rm Pr}_\pi\!}\left\{#1\right\}}
+\def\Epib#1{\EEb{\pi}{#1}}
+
+\newcommand{\zerovec}{\mathbf{0}}
+
+% Definitions for importance sampling placement
+\def\dtp{\delta_t^\prime}
+\def\ztp{\z_t^\prime}
+\def\dt{\delta_t}
+\def\zt{\vecz_t}
+\def\dtpp{\delta_t^{''}}
+\def\ztpp{\vecz_t^\prime}
+
+\def\v{V(S_t)}
+\def\vp{V(S_{t+1})}
+\def\res#1{\mathbf{res}({#1})}
+
+% \newcommand{\vpi#1}{ v^{ \pi_1}}
+% \newcommand{\vpi2}{ v^{ \pi_2 }}
+\def\vpi#1{v^{\pi_{#1}}}
+\def\qpi#1{q^{\pi_{#1}}}
+
+\def\vpi{v^{\pi}}
+\def\qpi{q^{\pi}}
+
+% \newcommand{\max}{\text{max }}
+
+% For the coagents paper
+\newcommand{\bparams}{ {\boldsymbol{\theta^{(v)}}} }
+\newcommand{\cparams}{ {\boldsymbol{\theta^{(q)}}} }
+\newcommand{\obs}{\veco}
+% \newcommand{\allh}{h}
+\newcommand{\aminusj}{\veca_{-j}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{remark}[theorem]{Remark}
+% \newtheorem{fact}[theorem]{Fact}
+\newtheorem{assumption}[theorem]{Assumption}
+
+% 1-inch margins, from fullpage.sty by H.Partl, Version 2, Dec. 15, 1988.
+\topmargin 0pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+\textheight 8.9in
+\oddsidemargin 0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+\textwidth 6.5in
+
+\parindent 0in
+\parskip 1.5ex
+%\renewcommand{\baselinestretch}{1.25}
+
+% added by kartik sreenivasan
+\newcommand{\eg}{{\it e.g.}, }
+\newcommand{\ie}{{\it i.e.}, }
+% \newcommand{\E}{\mathbb{E}}
+% \newcommand{\EE}{\mathbb{E}}
+% \newcommand{\R}{\mathbb{R}}
+\newcommand{\mbR}{\mathbb{R}}
+\newcommand{\selfconc}{\mathrm{selfconc}\xspace}

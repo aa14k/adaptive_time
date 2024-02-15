@@ -1,0 +1,202 @@
+\documentclass[11pt]{article}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{epsfig}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+\usepackage{xspace}
+\input{macros.tex}
+
+
+
+%\usepackage[size=tiny,disable]{todonotes}
+\usepackage[size=tiny]{todonotes}
+
+\newcommand{\todoa}[2][]{\todo[size=\scriptsize,color=blue!20!white,#1]{AA: #2}}
+
+\title{Adaptive Time}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+Questions:
+\begin{itemize}
+    \item We talked about finding per-state scales, however when doing control it seems like the most useful scale would change over time as well -- even for a fixed data budget. Are we looking to build something that can tackle this too?
+\end{itemize}
+
+
+Motivation:
+\begin{itemize}
+    \item Typically, an agent interacts with an environment a pre-determined rate. This rate may not be ideal for the learning and performing in the environment. Furthermore, the ideal rate is likely to be state and budget dependent. In this work we propose to dynamically adapt the interaction rate for improved performance.
+    \item Concern: we must pay for finding a good interaction rate.
+    \begin{itemize}
+        \item This is true, we could not compete with someone having given us the right interaction rate.
+        \item However, this is not typically the case, especially considering that the right rate is dependent on the state, and potentially the stage in learning. This makes our method superior in cases where finding a 
+    \end{itemize}
+
+    
+\end{itemize}
+
+Intuitions:
+\begin{itemize}
+    \item Intuitively, we should work with an environment (both in terms of acting in it and reasoning about it) at the highest sensible scale for good progress on learning. (See discussion later). We can refine timescales as needed as we get higher data budgets.
+    \item To find a good scale: from a state, consider ``action-value functions" that are also a function of action repetition for the first immediate action, and afterwards uses whatever action scale makes sense (Assume that rewards scales are taken care of.) If sticking to the action longer has value comparable to no repetition, it tells us we can work with the environment at that scale.
+    \begin{itemize}
+        \item This seems related to the technique for numeric integration Alex mentioned.
+    \end{itemize}
+    \item The above works in fully tabular situations, but if there is an underlying space with distances (e.g. the state space in mountain car) this could be exploited for generalization.
+\end{itemize}
+
+Techniques:
+\begin{itemize}
+    \item bla
+\end{itemize}
+
+
+\input{main_paper/setting}
+\input{main_paper/quadrature}
+\section{Algorithm}
+\section{Analysis}
+\section{Numerical Experiments}
+\section{Related Work}
+Keywords and places to look into
+\begin{enumerate}
+    \item Semi Markov Decision Process
+    \item Temporal Abstraction of Reinforcement Learning
+    \item Continuous Time Control in Reinforcement Learning
+    \item Time Discretization for Reinforcement Learning
+    \item There is a whole line of work on action xrepetition
+\end{enumerate}
+
+\newcommand{\delt}{{\delta t}}
+\subsection{Time Discretization-Invariant Safe Action Repetition for Policy Gradient Methods} \cite{park2021time}
+
+Main points:
+
+\begin{itemize}
+    \item Learn policy (with PPO, TRPO, or A2C) that outputs action and commitment level.  The idea is that SGD will adjust the commitment level, per state, to maximize returns.
+    \item The innovation: commitment level is based on distance in state space, as opposed to time. This makes it more robust, handling stochastic environments as well. (Previous work did committing to a number of repetitions.)
+    \item Overall, this seems like good work, they have results on Mujoco that they are discretization invariant, an analysis of algo behaviour on InvertedPendulum.
+    \item Main criticism in reviews: distance metric on the state-space is fixed.
+    \item Opportunity? Learn more from the data: we can always learn about shorter commitments based on data from longer commitments.
+\end{itemize}
+
+
+The paper talks about a very similar idea of what I have been thinking, and it provides a good references to works which talk about action repeating as a way of temporal abstraction. They do connect it to options, but not explicitly the way they train it. They use $\delta$ to refer to the time step that the environment takes. 
+First they define a continuous time MDP with deterministic environments governed by a dynamical system equation, i.e. MDP $\M = (\S , \A, r, F, \gamma) $, where the state and action space are continous and at the same time the state transition is governed as 
+\begin{align*}
+    s(t) = s(0) + \int_{0}^{t} F(s(t'), a(t'))dt'\\
+    R(\tau) = \int_{0}^{\infty} \gamma^{t'} r(s(t'), a(t')) dt'
+\end{align*}
+where $s(t)$ and $a(t)$ are states and action at time $t$ and $\tau$ represents the whole trajectory, in some sense the return is $R$. 
+
+Using \cite{tallec2019making} they define a discretized version of this MDP $\M$ as $\M_\delta = (\S, \A, r_\delta, F_\delta, \gamma_\delta)$ with a discretization time scale of $\delta > 0$, where the agent observes a state and performs an action every $\delta$. So the state $s_i$ in $\M_\delta$ is actually state $s_(i\delta)$ for $\M$, and action $a_i$ is maintained during the time interval $[i\delta, (i+1)\delta]$. Details for this I will skip to the paper. 
+\textbf{The main Ideas} The paper mentions that people have previously solved this issue by doing action repetitions, but that action repetition has not been state dependent, what this means is that if there a sudden change in the state , the agent is unable to interrupt and the action keeps continuing. Previous methods often produced a action, and the number of times, the action should be repeated. 
+What they propose is a safe region around the state, where the action can be executed, what this means is that the policy at every decision step produces an action and radius of safety zone for that action, i.e. $\pi(a_i,d_i | s_i)$, where the action is executed until the agent stays within the $\triangle(s, s_i) \leq d_i$ distance to the state for which the action was selected. This region is defined as the safe regions. For this paper (i.e. in the experiments), they use the $\triangle(s, s_i) = \| \tilde{s} - \tilde{s_i} \|_1 / dim(\S)$.  They show that their method's performance is invariant to the $\delta$ of the environment.
+\textbf{Pros and Contributions} (1) Provide a proof of the variance explosion for PG estimators for $\delta \rightarrow 0$, and show this can be solved with temporally abstracted actions. (2) A state dependent action repetition strategy , rather than a precomputed value for the whole environment. (3) Followed by experiments. 
+\textbf{Cons} (1) The don't draw exactly good connections to the options literature exactly. (2) They use a radius a measure for safe distance for action , I think this boils down to using the right distance metric on the state space of the agent, and this might be difficult to predetermine. (3) They use moving average to normalize the state representation, which is good. Maybe option termination functions might be a better way to do this. (3) Need to look closely, but we want a policy iteration strategy where the actions start with a very large repetition window, but converges to the optimal repetition windows which is balance between small and big and maintains the optimal policy. 
+
+Reviews for the \hyperlink{https://openreview.net/forum?id=xNmhYNQruJX}{paper}
+The meta reviewer points out the issue with the distance metric for states . 
+One reviewer mentions about the possiblity of variance not exploding because stochasticity will reduce in the environment. 
+
+I think another issue lies in the fact that the agent needs some non markovian information of the current state and the starting state and also need a interrupt check controller of some form. I need to think a bit more about this. 
+
+
+\subsection{Reinforcement learning in continuous time: Advantage updating} \cite{baird1994reinforcement}
+
+This paper talks about the value function collapse in the case of decrease in time window size discretization. The paper reasons that learning a Q function might not be appropriate for very small time window as the Q function might simply collapse into the Value function , as the effect of a different action at given state might reduce in the overall optimal trajectory and hence it might be difficult to extract the policy from the Q function. 
+
+Instead the paper proposes to learn an advantage function $A(x, u)$, which tells the advantage of a specific action in a given state over the other actions. $\max_u A(x,u) = 0$,i.e. at convergence and optimal policy the advatange of the optimal action is going to be zero, and advantage of the suboptimal action is going to be negative.  
+
+\begin{align*}
+    A^*(x,u) = \dfrac{1}{\triangle t} \left[ Q^*(x, u) - \max_{u'} Q^*(x, u') \right]
+\end{align*}
+
+
+They learn this function instead of the Q functions , by having bellman like updates for the same, and hence show that the learn on continuous time systems (with fine discretization) better then Q learning and Value iteration. 
+
+
+\subsection{Dynamic Action Repetition for Deep Reinforcement Learning} \cite{lakshminarayanan2017dynamic}
+
+This is a very simple paper and only empirical. The paper proposes to double the action space, where each action is repeated twice, with the first being a smaller rate and the second one having a larger rate of repetition. Then they learn a DQN / PG policy on top of that and show results for that. This is a simple approach but they don't have any theory around it and focus mostly on games. 
+
+They do talk about state dependent dynamic Action Repetition Rate (ARR) for future work though. 
+
+
+\subsection{Learning to Repeat: Fine Grained Action Repetition for Deep Reinforcement Learning} \cite{sharma2020learning}
+They just augment the policy to output actions and the number of repetitions for that action, and train that. I am not sure about the objective, the paper is again mostly empirical. 
+
+\subsection{Making Deep Q-learning methods robust to time discretization} \cite{tallec2019making}
+
+\textbf{Theorem 2 }: There is no Q function in continuous time. 
+Contributions
+\begin{itemize}
+    \item Formally show that Q function collapses to the  Value Function (V) in near continuous time systems. 
+    \item Propose an algorithm which shows significant advantages. 
+\end{itemize}
+I am not sure if its just a restatement, but they propose a way to learn the Advantage function, which is invariant of the discretization i.e. it converges to some function in the limit of $\delta t \rightarrow 0$. I.e. $\lim_{ \delta t \rightarrow 0 }A^\pi_{\delta t} (s, a) = A^\pi(s,a) $, what this says is that this function exists in the limit , and to me this paper just seems like a better and more refined way of writing \cite{baird1994reinforcement} with more formal proofs. 
+
+\begin{align*}
+    Q^{\pi}_{\delt} (s,a) = V^\pi_\delt (s) + \delt A^\pi_\delt (s,a)
+    \end{align*}
+So we re scale $A^\pi_\delt$ with the appropriate
+\textbf{Cons : The biggest CON is see is the learning algorithm needs to be aware of the $\delt$ of the environment. }
+Will just list theorems for ease
+
+
+\textbf{Theorem 1} : $V^\pi_\delt(s) $ converges to $V^\pi(s) $ when $\delt \rightarrow 0$
+
+\textbf{Theorem 2} : $Q^\pi_\delt(s,a) = V^\pi_\delt (s) + O(\delt)$, when $\delt \rightarrow 0$, for every $(s,a)$.
+
+\textbf{Theorem 3} : $A^\pi_\delt (s,a)$ has a limit for $\delt \rightarrow 0 $.
+
+
+\subsection{Lazy-MDPs: Towards Interpretable Reinforcement Learning by Learning When to Act}
+\cite{jacq2022lazy}
+The paper introduces a new framework in the form of an augmentation on top of an MDP, by adding a lazy action, in which case the agent falls back on executing a default policy.
+I.e., lets say we have an MDP $M = (\S, \A, P, r, \gamma, d_0)$ in the standard case, and we define another MDP, $M_+= (M, \bar{a}, \bar{\pi}, \eta)$, where $\bar{a}$ is the lazy action, and $\bar{\pi}$
+ is the default policy, $\eta \in \Re$ is the penalty that the agent receives for taking any other action expect the lazy action. Whenever the action takes the lazy action the agent uses the default policy $\bar{\pi}$ to execute an action, hence the new MDP becomes
+ \begin{align*}
+     M_+ = (\S, \A_+, \gamma, r_+, P_+, d_0)
+ \end{align*}
+ where the new action space, transition function and reward function are defined as follows:
+ \begin{align*}
+     \A_+ &= \A \cup \{\bar{a}\}\\
+     r_+ (s,a) &=   
+     \begin{cases} 
+    r(s,a) - \eta & \text{if } a \in \A \\
+    \sum_{a\in\A} \bar{\pi}(a|s) r(s,a) & \text{if } a = \bar{a}
+  \end{cases}\\
+  P_+ (s'| s,a) &=   
+     \begin{cases} 
+    P(s'|s,a) & \text{if } a \in \A \\
+    \sum_{a\in\A} \bar{\pi}(a|s) P(s'|s,a) & \text{if } a = \bar{a}
+  \end{cases}\\
+ \end{align*}
+ 
+l
+ 
+ 
+ \subsection{Control Frequency Adaptation via Action Persistence in Batch Reinforcement Learning}
+\cite{metelli2020control}
+\subsection{Temporally-Extended {$\epsilon$}-Greedy Exploration}
+
+\cite{dabney2020temporally}
+
+Improve exploration by committing to the same action (action-repeat) for an extended period when taking an exploratory action.
+
+In particular, using a heavy-tailed distribution (zeta) for the duration worked well and is ecologically motivated, too. A different parameter of the zeta distribution works best for different environments.
+
+\subsection{Nyquist Sampling}
+
+
+\bibliography{references}
+\bibliographystyle{apalike}
+
+\end{document}
