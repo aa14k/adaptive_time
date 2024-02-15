@@ -77,7 +77,7 @@ class MountainCar(object):
             s_ = np.array([pos,vel])
             return cost, s_
         else:
-            cost = np.where(pos >= 0.6, self.means[0], self.means[1]) #first arguement is for the successful trajectory 
+            cost = np.where(pos >= 0.6, self.means[0], self.means[1]) #first argument is for the successful trajectory 
             s_ = np.array([None] * n)
             return cost, s_
     
@@ -91,15 +91,13 @@ class MountainCar(object):
             
         else:
             self.pos = max(self.pos + self.vel,-1.2)
-            
-        if self.pos > 0.6:
-            self.pos = 0.6
+
             
         if self.h == self.horizon-1:
             self.done = True
-            if self.pos < -0.52:
-                cost = np.random.binomial(1,p=1.0)
+            if self.pos < 0.6:
+                reward = -1.0
             else:
-                cost = np.random.binomial(1,p=1.0)
+                reward = 0.0
             
-        return cost, [self.pos, self.vel], self.h, self.done
+        return reward, np.array([self.pos, self.vel]), self.h, self.done
