@@ -1,3 +1,3 @@
 # Requirements (update as needed)
 
-1. Numpy
+1. numpy
