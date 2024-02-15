@@ -1,0 +1,18 @@
+{
+    "env": "mountain_car",
+    "env_kwargs": {
+        "horizon": 100
+    },
+    "seed": 42,
+    "agent_config": {
+        "q_function": "tile_coding",
+        "iht_size": 4096,
+        "num_tiles": 8,
+        "num_tilings": 8,
+        "learning_rate": 1e-3,
+        "action_space": [-1, 0, 1],
+        "seed": 42
+    },
+    "budget": 3000,
+    "num_trajs_per_update": 1
+}
