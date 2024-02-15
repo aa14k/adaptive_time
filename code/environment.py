@@ -3,6 +3,7 @@ import numpy as np
 class MountainCar(object):
     def __init__(self, horizon):
         self.horizon = horizon
+        self.means = np.array([0,1.0])
         self.reset()
     
     def reset(self):
