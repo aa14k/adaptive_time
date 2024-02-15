@@ -25,18 +25,19 @@ class MountainCar(object):
         reward = 0
 
         if self.pos > 0.6:
+            # At goal; stay there.
             self.pos = 0.6
+            reward = 0.0
         else:
+            # Not at goal; move.
             self.pos = max(self.pos + self.vel, -1.2)
-
-        if self.h == self.horizon - 1:
+            reward = -1.0
+            
+        if self.h == self.horizon-1:
             self.done = True
-            if self.pos < 0.6:
-                reward = -1.0
-            else:
-                reward = 0.0
-
+            
         return reward, np.array([self.pos, self.vel]), self.h, self.done
+
 
     # Code for broadcasting Mountain Car, might be useful later.
 
