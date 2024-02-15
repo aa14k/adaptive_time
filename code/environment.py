@@ -17,7 +17,32 @@ class MountainCar(object):
         self.h = -1
         return [self.pos,self.vel]
     
+    def step(self, action):
+        self.h += 1
+        self.vel = max(min(self.vel + 0.001 * action + -0.0025 * np.cos(3 * self.pos),0.07),-0.07)
+        cost = 0
+        
+        if self.pos > 0.6:
+            self.pos = 0.6
+            
+        else:
+            self.pos = max(self.pos + self.vel,-1.2)
+
+            
+        if self.h == self.horizon-1:
+            self.done = True
+            if self.pos < 0.6:
+                reward = -1.0
+            else:
+                reward = 0.0
+            
+        return reward, np.array([self.pos, self.vel]), self.h, self.done
     
+
+# Code for broadcasting Mountain Car, might be useful later.
+    
+    '''
+
     def step_broadcast(self, s, action, n, var):
         self.h += 1
         
@@ -80,24 +105,6 @@ class MountainCar(object):
             cost = np.where(pos >= 0.6, self.means[0], self.means[1]) #first argument is for the successful trajectory 
             s_ = np.array([None] * n)
             return cost, s_
-    
-    def step(self, action):
-        self.h += 1
-        self.vel = max(min(self.vel + 0.001 * action + -0.0025 * np.cos(3 * self.pos),0.07),-0.07)
-        cost = 0
-        
-        if self.pos > 0.6:
-            self.pos = 0.6
-            
-        else:
-            self.pos = max(self.pos + self.vel,-1.2)
 
             
-        if self.h == self.horizon-1:
-            self.done = True
-            if self.pos < 0.6:
-                reward = -1.0
-            else:
-                reward = 0.0
-            
-        return reward, np.array([self.pos, self.vel]), self.h, self.done
+'''
