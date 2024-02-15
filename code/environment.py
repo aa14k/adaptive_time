@@ -3,7 +3,6 @@ import numpy as np
 class MountainCar(object):
     def __init__(self,horizon):
         self.horizon = horizon
-        self.means = np.array([0,1.0])
         self.reset()
         
     
@@ -27,8 +26,7 @@ class MountainCar(object):
             
         else:
             self.pos = max(self.pos + self.vel,-1.2)
-
-            
+    
         if self.h == self.horizon-1:
             self.done = True
             if self.pos < 0.6:
