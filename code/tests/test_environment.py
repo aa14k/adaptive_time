@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
 
     def test_run_env(self):
         rng = random.Random(13)
-        env = environment.MountainCar(horizon=10)
+        env = environment.MountainCar(horizon_sec=10)
         rewards = []
         states = []
         hs = []
@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
             [-0.52660518, -0.00751935],
             [-0.53310198, -0.0064968 ],
         ])
-        expected_hs = list(range(11))
+        expected_hs = list(range(1, 12))
         expected_dones = [False] * 9 + [True] * 2
 
         # Check correctness.
@@ -56,5 +56,35 @@ class Test(unittest.TestCase):
         self.assertEqual(hs, expected_hs)
         self.assertEqual(dones, expected_dones)
         
+    def test_dt_equivalence(self):
+        """Test that the environment behaves the same with different dt."""
+        rng = random.Random(13)
+        env_coarse = environment.MountainCar(horizon_sec=10, dt_sec=1.0)
+        env_fine = environment.MountainCar(horizon_sec=10, dt_sec=0.2)
+        logger.info("Running environment.")
+
+        action = rng.choice([-1, 1])
+
+        for second in range(12):
+            action = rng.choice([-1, 1])
+
+            for sub_second in range(5):
+                # Fine environment.
+                reward_fine, state_fine, h_fine, done_fine = env_fine.step(action)
+                logger.info(
+                    "s=%r/%r;  FINE: %r, %r, %r, %r",
+                    second, sub_second, reward_fine, state_fine, h_fine, done_fine)
+
+            # Coarse environment.
+            reward_coarse, state_coarse, h_coarse, done_coarse = env_coarse.step(action)
+            logger.info(
+                "s=%r;  COARSE: %r, %r, %r, %r",
+                second, reward_coarse, state_coarse, h_coarse, done_coarse)
+
+            self.assertEqual(reward_coarse, reward_fine)
+            self.assertTrue(np.allclose(state_coarse, state_fine, atol=0., rtol=0.01))
+            self.assertAlmostEqual(h_coarse, h_fine)
+            self.assertEqual(done_coarse, done_fine)
+
 
             
