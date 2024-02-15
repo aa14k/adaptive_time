@@ -1,12 +1,10 @@
 import numpy as np
 
 class MountainCar(object):
-    def __init__(self,horizon):
+    def __init__(self, horizon):
         self.horizon = horizon
         self.means = np.array([0,1.0])
         self.reset()
-        
-    
     
     def reset(self):
         #self.pos = np.random.uniform(low=-1.2,high=0.6)
@@ -19,15 +17,15 @@ class MountainCar(object):
     
     def step(self, action):
         self.h += 1
-        self.vel = max(min(self.vel + 0.001 * action + -0.0025 * np.cos(3 * self.pos),0.07),-0.07)
+        self.vel = max(min(
+            self.vel + 0.001 * action + -0.0025 * np.cos(3 * self.pos),
+            0.07),-0.07)
         cost = 0
         
         if self.pos > 0.6:
             self.pos = 0.6
-            
         else:
             self.pos = max(self.pos + self.vel,-1.2)
-
             
         if self.h == self.horizon-1:
             self.done = True
