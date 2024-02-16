@@ -8,6 +8,7 @@ import numpy as np
 
 from environment import MountainCar
 from monte_carlo import mc_policy_iteration
+from sarsa import sarsa
 from q_functions import MountainCarTileCodingQ
 
 
@@ -45,22 +46,32 @@ def main(args):
             self.num_steps = num_steps
 
         def sample_time(self):
-            return np.arange(self.num_steps)
+            return np.arange(0, self.num_steps, 2)
 
     # TODO: Better way to construct these objects
-    observation_sampler = MockSampler(config.env_kwargs.horizon)
+    observation_sampler = MockSampler(config.env_kwargs.horizon_sec)
     q_function = None
     env = None
     if config.env == "mountain_car":
         q_function = MountainCarTileCodingQ(config.agent_config)
         env = MountainCar(**vars(config.env_kwargs))
 
-    mc_policy_iteration(
-        env=env,
-        q_function=q_function,
-        observation_sampler=observation_sampler,
-        config=config,
-    )
+    if config.agent_config.update_rule == "monte_carlo":
+        mc_policy_iteration(
+            env=env,
+            q_function=q_function,
+            observation_sampler=observation_sampler,
+            config=config,
+        )
+    elif config.agent_config.update_rule == "sarsa":
+        sarsa(
+            env=env,
+            q_function=q_function,
+            observation_sampler=observation_sampler,
+            config=config,
+        )
+    else:
+        raise NotImplementedError
 
 
 if __name__ == "__main__":
@@ -68,7 +79,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config_path",
         type=str,
-        default="configs/mc_tilecoding.json",
+        required=True,
         help="The experiment configuration path",
     )
     args = parser.parse_args()

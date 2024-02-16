@@ -25,7 +25,7 @@ def generate_traj(
     horizon = 0
     while not done:
         curr_act = q_function.greedy_action(curr_obs)
-        reward, curr_obs, horizon, done = env.step(curr_act)
+        reward, curr_obs, (_, horizon), done = env.step(curr_act)
         obss.append(curr_obs)
         acts.append(curr_act)
         rews.append(reward)
@@ -36,11 +36,14 @@ def generate_traj(
         acts.extend([curr_act] * padding_to_add)
         rews.extend([0] * padding_to_add)
 
-    return {
-        "obss": np.array(obss),
-        "acts": np.array(acts),
-        "rews": np.array(rews),
-    }, horizon
+    return (
+        dict(
+            obss=np.array(obss),
+            acts=np.array(acts),
+            rews=np.array(rews),
+        ),
+        horizon,
+    )
 
 
 def observe_discrete_traj(
@@ -103,7 +106,12 @@ def mc_policy_iteration(
             if sample_i >= budget:
                 break
 
-        aux = q_function.update(disc_trajs, ep_horizons, observe_times, env.horizon)
+        aux = q_function.update(
+            disc_trajs=disc_trajs,
+            ep_horizons=ep_horizons,
+            observe_times=observe_times,
+            max_time=env.horizon,
+        )
 
         if iter_i % config.log_frequency == 0:
             print(
