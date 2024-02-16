@@ -19,12 +19,12 @@ class MountainCarTileCoder:
         self.iht = tc.IHT(iht_size)
         self.num_tilings = num_tilings
         self.num_tiles = num_tiles
-    
+
     def get_tiles(self, position, velocity):
         """
         Takes in a position and velocity from the mountaincar environment
         and returns a numpy array of active tiles.
-        
+
         Arguments:
         position -- float, the position of the agent between -1.2 and 0.5
         velocity -- float, the velocity of the agent between -0.07 and 0.07
@@ -42,21 +42,24 @@ class MountainCarTileCoder:
         VELOCITY_MIN = -0.07
         VELOCITY_MAX = 0.07
         ### END CODE HERE ###
-        
+
         # Use the ranges above and self.num_tiles to set position_scale and velocity_scale
         # position_scale = number of tiles / position range
         # velocity_scale = number of tiles / velocity range
-        
+
         # Scale position and velocity by multiplying the inputs of each by their scale
-        
+
         ### START CODE HERE ###
         position_scale = self.num_tiles / (POSITION_MAX - POSITION_MIN)
         velocity_scale = self.num_tiles / (VELOCITY_MAX - VELOCITY_MIN)
         ### END CODE HERE ###
-        
+
         # get the tiles using tc.tiles, with self.iht, self.num_tilings and [scaled position, scaled velocity]
         # nothing to implment here
-        tiles = tc.tiles(self.iht, self.num_tilings, [position * position_scale, 
-                                                      velocity * velocity_scale])
-        
+        tiles = tc.tiles(
+            self.iht,
+            self.num_tilings,
+            [position * position_scale, velocity * velocity_scale],
+        )
+
         return np.array(tiles)

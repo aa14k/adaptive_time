@@ -6,6 +6,7 @@
     "seed": 42,
     "agent_config": {
         "q_function": "tile_coding",
+        "returns": "monte_carlo",
         "iht_size": 4096,
         "num_tiles": 8,
         "num_tilings": 8,
@@ -13,6 +14,7 @@
         "action_space": [-1, 0, 1],
         "seed": 42
     },
-    "budget": 3000,
-    "num_trajs_per_update": 1
+    "budget": 500000,
+    "num_trajs_per_update": 10,
+    "log_frequency": 100
 }

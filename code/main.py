@@ -29,6 +29,7 @@ def parse_dict(d: Dict) -> SimpleNamespace:
     ]
     return x
 
+
 def main(args):
     with open(args.config_path, "r") as f:
         config_dict = json.load(f)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         "--config_path",
         type=str,
         default="configs/mc_tilecoding.json",
-        help="The experiment configuration path"
+        help="The experiment configuration path",
     )
     args = parser.parse_args()
 
