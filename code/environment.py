@@ -1,45 +1,46 @@
 import numpy as np
 
+
 class MountainCar(object):
     def __init__(self, horizon):
         self.horizon = horizon
-        self.means = np.array([0,1.0])
+        self.means = np.array([0, 1.0])
         self.reset()
-    
+
     def reset(self):
-        #self.pos = np.random.uniform(low=-1.2,high=0.6)
-        #self.vel = np.random.uniform(low=-0.07,high=0.07)
+        # self.pos = np.random.uniform(low=-1.2,high=0.6)
+        # self.vel = np.random.uniform(low=-0.07,high=0.07)
         self.pos = -0.5
         self.vel = 0.0
         self.done = False
         self.h = -1
-        return [self.pos,self.vel]
-    
+        return [self.pos, self.vel]
+
     def step(self, action):
+        action = [-1, 0, 1][action]
         self.h += 1
-        self.vel = max(min(
-            self.vel + 0.001 * action + -0.0025 * np.cos(3 * self.pos),
-            0.07),-0.07)
-        cost = 0
-        
+        self.vel = max(
+            min(self.vel + 0.001 * action + -0.0025 * np.cos(3 * self.pos), 0.07), -0.07
+        )
+        reward = 0
+
         if self.pos > 0.6:
             self.pos = 0.6
         else:
-            self.pos = max(self.pos + self.vel,-1.2)
-            
-        if self.h == self.horizon-1:
+            self.pos = max(self.pos + self.vel, -1.2)
+
+        if self.h == self.horizon - 1:
             self.done = True
             if self.pos < 0.6:
                 reward = -1.0
             else:
                 reward = 0.0
-            
-        return reward, np.array([self.pos, self.vel]), self.h, self.done
-    
 
-# Code for broadcasting Mountain Car, might be useful later.
-    
-    '''
+        return reward, np.array([self.pos, self.vel]), self.h, self.done
+
+    # Code for broadcasting Mountain Car, might be useful later.
+
+    """
 
     def step_broadcast(self, s, action, n, var):
         self.h += 1
@@ -105,4 +106,4 @@ class MountainCar(object):
             return cost, s_
 
             
-'''
+"""
