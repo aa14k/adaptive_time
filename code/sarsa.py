@@ -23,14 +23,16 @@ def generate_transition(
 
     """
     done = False
+    init_obs = curr_obs
     while not done and last_observe_time < observe_time:
-        curr_act = q_function.sample_action(curr_obs)
+        curr_act = q_function.greedy_action(curr_obs)
         rew, curr_obs, _, done = env.step(curr_act)
         last_observe_time += 1
 
     return (
         dict(
-            obs=curr_obs,
+            curr_obs=init_obs,
+            next_obs=curr_obs,
             act=curr_act,
             rew=rew,
             done=done,
@@ -73,7 +75,7 @@ def sarsa(
 
     assert not curr_tx["done"], "No samples because the observe sample exceeded horizon"
 
-    curr_obs = curr_tx["obs"]
+    curr_obs = curr_tx["next_obs"]
     while sample_i < budget:
         traj_i = 0
 
@@ -99,7 +101,7 @@ def sarsa(
         )
         ep_returns[-1] += curr_tx["rew"] * (observed_time - curr_observe_sample)
 
-        curr_obs = next_tx["obs"]
+        curr_obs = next_tx["next_obs"]
         curr_observe_sample = observed_time
         curr_tx = next_tx
 
@@ -124,6 +126,7 @@ def sarsa(
             assert not curr_tx[
                 "done"
             ], "No samples because the observe sample exceeded horizon"
+            curr_obs = curr_tx["next_obs"]
 
         if sample_i % config.log_frequency == 0:
             print("Sample {} ====================================".format(sample_i))

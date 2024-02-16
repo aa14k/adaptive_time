@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from typing import Any, List, Dict
 
 from code.features import MountainCarTileCoder
-from code.utils import softmax
+from code.utils import softmax, argmax
 
 import numpy as np
 
@@ -45,18 +45,14 @@ class MountainCarTileCodingQ(QFunction):
     def __init__(self, agent_config: SimpleNamespace) -> None:
         super().__init__()
         self.agent_config = agent_config
+        self.num_parameters = getattr(agent_config, "iht_size", 4096)
         self.tile_coder = MountainCarTileCoder(
-            iht_size=getattr(agent_config, "iht_size", 4096),
+            iht_size=self.num_parameters,
             num_tilings=getattr(agent_config, "num_tilings", 8),
             num_tiles=getattr(agent_config, "num_tiles", 8),
         )
         rng = np.random.RandomState(agent_config.seed)
         self.action_space = agent_config.action_space
-        self.num_parameters = (
-            self.tile_coder.num_tiles
-            * self.tile_coder.num_tilings
-            * self.tile_coder.num_tilings
-        )
         self.parameters = rng.randn(
             self.num_parameters,
             len(agent_config.action_space),
@@ -85,12 +81,12 @@ class MountainCarTileCodingQ(QFunction):
         next_observe_sample: int,
         max_time: int,
     ):
-        curr_feature = self.get_feature(curr_tx["obs"])
+        curr_feature = self.get_feature(curr_tx["curr_obs"])
         q_val = (curr_feature @ self.parameters)[curr_tx["act"]]
 
         next_q_val = 0.0
         if not next_tx["done"]:
-            next_q_val = (self.get_feature(next_tx["obs"]) @ self.parameters)[
+            next_q_val = (self.get_feature(next_tx["curr_obs"]) @ self.parameters)[
                 next_tx["act"]
             ]
 
@@ -110,8 +106,8 @@ class MountainCarTileCodingQ(QFunction):
             td_error=td_error,
             q_val=q_val,
             next_q_val=next_q_val,
-            rew=curr_tx["rew"],
-            act=curr_tx["act"],
+            curr_tx=curr_tx,
+            next_tx=next_tx,
             param_norms=np.linalg.norm(self.parameters, axis=0),
             update_norm=np.linalg.norm(update),
         )
@@ -198,7 +194,7 @@ class MountainCarTileCodingQ(QFunction):
     def greedy_action(self, obs: Any, **kwargs):
         feature = self.get_feature(obs)
         q_vals = feature @ self.parameters
-        return np.argmax(q_vals)
+        return argmax(q_vals)
 
     def sample_action(self, obs: Any, **kwargs):
         feature = self.get_feature(obs)

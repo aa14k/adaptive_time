@@ -33,16 +33,12 @@ def softmax(x: np.ndarray) -> np.ndarray:
     return np.exp(z) / np.sum(np.exp(z), axis=-1)
 
 
-def argmax(q_values):
-    top = float("-inf")
-    ties = []
+def argmax(x: np.ndarray) -> np.ndarray:
+    """
+    Argmax operation on the last axis---randomly break ties
+    - x (np.ndarray): values
 
-    for i in range(len(q_values)):
-        if q_values[i] > top:
-            top = q_values[i]
-            ties = []
-
-        if q_values[i] == top:
-            ties.append(i)
-
-    return np.random.choice(ties)
+    """
+    max_val = np.max(x, axis=-1)
+    idxes = np.where(x == max_val)[0]
+    return np.random.choice(idxes)
