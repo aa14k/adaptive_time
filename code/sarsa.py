@@ -18,7 +18,8 @@ def generate_transition(
     Generate a trajectory from the environment using the most fine-grain timescale
     - env (Any): An environment that somewhat follows Gym API
     - q_function (Any): The Q-function to learn from
-    - observe_time (int): The time to sample, relative to current time
+    - last_observe_time (int): The last sample observation time
+    - observe_time (int): The sample observation time
 
     """
     done = False
