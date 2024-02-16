@@ -46,7 +46,7 @@ def main(args):
             self.num_steps = num_steps
 
         def sample_time(self):
-            return np.arange(2, self.num_steps, 2)
+            return np.arange(0, self.num_steps, 2)
 
     # TODO: Better way to construct these objects
     observation_sampler = MockSampler(config.env_kwargs.horizon_sec)

@@ -2,7 +2,7 @@ import numpy as np
 
 
 class MountainCar(object):
-    def __init__(self, horizon_sec=200., dt_sec=1.0):
+    def __init__(self, horizon_sec=200.0, dt_sec=1.0):
         self.horizon_sec = horizon_sec
         self.dt_sec = dt_sec
         self.horizon = int(horizon_sec / dt_sec)
@@ -23,9 +23,16 @@ class MountainCar(object):
         action = [-1, 0, 1][action]
         self.h += self.dt_sec
         self.h_disc += 1
-        self.vel = max(min(
-            (self.vel + self.dt_sec *(0.001 * action + -0.0025 * np.cos(3 * self.pos))),
-            0.07),-0.07)
+        self.vel = max(
+            min(
+                (
+                    self.vel
+                    + self.dt_sec * (0.001 * action + -0.0025 * np.cos(3 * self.pos))
+                ),
+                0.07,
+            ),
+            -0.07,
+        )
 
         if self.pos >= 0.6:
             # At goal; stay there.
@@ -40,7 +47,6 @@ class MountainCar(object):
             self.done = True
 
         return reward, np.array([self.pos, self.vel]), (self.h, self.h_disc), self.done
-
 
     # Code for broadcasting Mountain Car, might be useful later.
 

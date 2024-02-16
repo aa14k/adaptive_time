@@ -65,39 +65,39 @@ class MountainCarTileCodingQ(QFunction):
 
     def sarsa_update(
         self,
-        curr_obs: Any,
-        act: Any,
-        rew: Any,
-        done: Any,
-        next_obs: Any,
+        curr_tx: Any,
+        next_tx: Any,
         curr_observe_sample: int,
         next_observe_sample: int,
         max_time: int,
     ):
-        curr_feature = self.tile_coder.get_tiles(*curr_obs)
-        q_val = (curr_feature @ self.parameters)[act]
+        curr_feature = self.tile_coder.get_tiles(*curr_tx["obs"])
+        q_val = (curr_feature @ self.parameters)[curr_tx["act"]]
 
         next_q_val = 0.0
-        if not done:
-            next_q_val = self.tile_coder.get_tiles(*next_obs) @ self.parameters
-            next_q_val = np.max(next_q_val)
+        if not next_tx["done"]:
+            next_q_val = (self.tile_coder.get_tiles(*next_tx["obs"]) @ self.parameters)[
+                next_tx["act"]
+            ]
 
-        td_error = (
-            (min(next_observe_sample, max_time) - curr_observe_sample) * rew + next_q_val - q_val
-        )
+        target = (min(next_observe_sample, max_time) - curr_observe_sample) * curr_tx[
+            "rew"
+        ] + next_q_val
+        td_error = target - q_val
         update = td_error * curr_feature
 
-        self.parameters[:, act] = (
-            self.parameters[:, act]
+        self.parameters[:, curr_tx["act"]] = (
+            self.parameters[:, curr_tx["act"]]
             + self.agent_config.learning_rate * update
         )
 
         return dict(
+            target=target,
             td_error=td_error,
             q_val=q_val,
             next_q_val=next_q_val,
-            rew=rew,
-            act=act,
+            rew=curr_tx["rew"],
+            act=curr_tx["act"],
             param_norms=np.linalg.norm(self.parameters, axis=0),
             update_norm=np.linalg.norm(update),
         )
@@ -137,9 +137,9 @@ class MountainCarTileCodingQ(QFunction):
         # Compute Q-values and TD errors
         q_vals = features @ self.parameters
         q_vals_act = np.take_along_axis(q_vals, disc_trajs["acts"][..., None], axis=-1)
-        ep_mask = (1 - np.eye(max_time + 1)[np.array(ep_horizons) + 1])[
-            ..., :-1
-        ][:, observe_times].reshape(-1, 1, 1)
+        ep_mask = (1 - np.eye(max_time + 1)[np.array(ep_horizons) + 1])[..., :-1][
+            :, observe_times
+        ].reshape(-1, 1, 1)
 
         td_error = rets[..., None] - q_vals_act
         acts_one_hot = np.eye(len(self.action_space))[disc_trajs["acts"]].reshape(

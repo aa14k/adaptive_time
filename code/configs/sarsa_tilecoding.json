@@ -1,20 +1,20 @@
 {
     "env": "mountain_car",
     "env_kwargs": {
-        "horizon": 100
+        "horizon_sec": 200
     },
     "seed": 42,
     "agent_config": {
         "q_function": "tile_coding",
         "update_rule": "sarsa",
-        "param_init_mean": 1,
+        "param_init_mean": 0,
         "iht_size": 4096,
-        "num_tiles": 14,
-        "num_tilings": 7,
+        "num_tiles": 8,
+        "num_tilings": 8,
         "learning_rate": 3e-4,
         "action_space": [-1, 0, 1],
         "seed": 43
     },
-    "budget": 5000000,
-    "log_frequency": 10
+    "budget": 500000,
+    "log_frequency": 1000
 }

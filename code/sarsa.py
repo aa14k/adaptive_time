@@ -7,11 +7,11 @@ import numpy as np
 from q_functions import QFunction
 
 
-# TODO: Modify generation
 def generate_transition(
     env: Any,
     curr_obs: Any,
     q_function: Any,
+    last_observe_time: int,
     observe_time: int,
 ) -> Tuple[Dict[str, Any], int]:
     """
@@ -22,18 +22,20 @@ def generate_transition(
 
     """
     done = False
-    curr_time = 0
-    while not done and curr_time < observe_time:
+    while not done and last_observe_time < observe_time:
         curr_act = q_function.greedy_action(curr_obs)
         rew, curr_obs, _, done = env.step(curr_act)
-        curr_time += 1
+        last_observe_time += 1
 
-    return dict(
-        next_obs=curr_obs,
-        act=curr_act,
-        rew=rew,
-        done=done,
-    ), curr_time
+    return (
+        dict(
+            obs=curr_obs,
+            act=curr_act,
+            rew=rew,
+            done=done,
+        ),
+        last_observe_time,
+    )
 
 
 def sarsa(
@@ -53,47 +55,74 @@ def sarsa(
     budget = config.budget
 
     sample_i = 0
-    step_i = 0
 
     curr_obs = env.reset()
     observe_times = observation_sampler.sample_time()
-    curr_observe_sample = 0
     ep_returns = [0]
 
+    curr_tx, observed_time = generate_transition(
+        env,
+        curr_obs,
+        q_function,
+        -1,
+        observe_times[0],
+    )
+    step_i = 1
+    curr_observe_sample = observed_time
+
+    assert not curr_tx["done"], "No samples because the observe sample exceeded horizon"
+
+    curr_obs = curr_tx["obs"]
     while sample_i < budget:
         traj_i = 0
-        next_observe_sample = observe_times[step_i]
 
-        # TODO: Modify to account for edge case (i.e. sample t=0)
+        if step_i == len(observe_times):
+            next_observe_sample = env.horizon
+        else:
+            next_observe_sample = observe_times[step_i]
+
         # Observe next observation based on suggested observation time
-        disc_tx, observed_time = generate_transition(
+        next_tx, observed_time = generate_transition(
             env,
             curr_obs,
             q_function,
-            next_observe_sample
+            curr_observe_sample,
+            next_observe_sample,
         )
         aux = q_function.update(
-            curr_obs=curr_obs,
-            **disc_tx,
+            curr_tx,
+            next_tx,
             curr_observe_sample=curr_observe_sample,
             next_observe_sample=observed_time,
             max_time=env.horizon,
         )
+        ep_returns[-1] += curr_tx["rew"] * (observed_time - curr_observe_sample)
 
-        curr_obs = disc_tx["next_obs"]
-
-        ep_returns[-1] += disc_tx["rew"] * (observed_time - curr_observe_sample)
+        curr_obs = next_tx["obs"]
         curr_observe_sample = observed_time
+        curr_tx = next_tx
 
         step_i += 1
-        if disc_tx["done"]:
-            step_i = 0
+        if curr_tx["done"]:
             traj_i += 1
-            ep_returns.append(0)
-            curr_observe_sample = 0
+
             curr_obs = env.reset()
-            print("RESET")
             observe_times = observation_sampler.sample_time()
+            ep_returns = [0]
+
+            curr_tx, observed_time = generate_transition(
+                env,
+                curr_obs,
+                q_function,
+                -1,
+                observe_times[0],
+            )
+            step_i = 1
+            curr_observe_sample = observed_time
+
+            assert not curr_tx[
+                "done"
+            ], "No samples because the observe sample exceeded horizon"
 
         if sample_i % config.log_frequency == 0:
             print("Sample {} ====================================".format(sample_i))
