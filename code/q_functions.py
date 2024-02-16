@@ -2,8 +2,8 @@ from abc import ABC, abstractclassmethod
 from types import SimpleNamespace
 from typing import Any, List, Dict
 
-from features import MountainCarTileCoder
-from utils import softmax
+from code.features import MountainCarTileCoder
+from code.utils import softmax
 
 import numpy as np
 
@@ -52,8 +52,13 @@ class MountainCarTileCodingQ(QFunction):
         )
         rng = np.random.RandomState(agent_config.seed)
         self.action_space = agent_config.action_space
+        self.num_parameters = (
+            self.tile_coder.num_tiles
+            * self.tile_coder.num_tilings
+            * self.tile_coder.num_tilings
+        )
         self.parameters = rng.randn(
-            self.tile_coder.num_tilings,
+            self.num_parameters,
             len(agent_config.action_space),
         ) * getattr(agent_config, "param_init_std", 0.1) + getattr(
             agent_config, "param_init_mean", 0.0
@@ -66,6 +71,12 @@ class MountainCarTileCodingQ(QFunction):
         else:
             raise NotImplementedError
 
+    def get_feature(self, obs: Any) -> np.ndarray:
+        active_tiles = self.tile_coder.get_tiles(*obs)
+        feature = np.zeros(self.num_parameters)
+        feature[active_tiles] = 1
+        return feature
+
     def sarsa_update(
         self,
         curr_tx: Any,
@@ -74,12 +85,12 @@ class MountainCarTileCodingQ(QFunction):
         next_observe_sample: int,
         max_time: int,
     ):
-        curr_feature = self.tile_coder.get_tiles(*curr_tx["obs"])
+        curr_feature = self.get_feature(curr_tx["obs"])
         q_val = (curr_feature @ self.parameters)[curr_tx["act"]]
 
         next_q_val = 0.0
         if not next_tx["done"]:
-            next_q_val = (self.tile_coder.get_tiles(*next_tx["obs"]) @ self.parameters)[
+            next_q_val = (self.get_feature(next_tx["obs"]) @ self.parameters)[
                 next_tx["act"]
             ]
 
@@ -131,10 +142,7 @@ class MountainCarTileCodingQ(QFunction):
 
         # Get tile-coding features
         features = np.array(
-            [
-                [self.tile_coder.get_tiles(*obs) for obs in obss]
-                for obss in disc_trajs["obss"]
-            ]
+            [[self.get_feature(obs) for obs in obss] for obss in disc_trajs["obss"]]
         )
 
         # Compute Q-values and TD errors
@@ -157,7 +165,7 @@ class MountainCarTileCodingQ(QFunction):
         """
         per_sample_update = (
             np.tile(
-                (td_error * features).reshape(-1, self.tile_coder.num_tilings)[:, None],
+                (td_error * features).reshape(-1, self.num_parameters)[:, None],
                 reps=(1, len(self.action_space), 1),
             )
             * acts_one_hot
@@ -188,12 +196,12 @@ class MountainCarTileCodingQ(QFunction):
         )
 
     def greedy_action(self, obs: Any, **kwargs):
-        feature = self.tile_coder.get_tiles(*obs)
+        feature = self.get_feature(obs)
         q_vals = feature @ self.parameters
         return np.argmax(q_vals)
 
     def sample_action(self, obs: Any, **kwargs):
-        feature = self.tile_coder.get_tiles(*obs)
+        feature = self.get_feature(obs)
         q_vals = feature @ self.parameters
         probs = softmax(q_vals)
         return np.random.choice(len(self.action_space), p=probs)

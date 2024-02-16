@@ -1,4 +1,4 @@
-import tiles3 as tc
+import code.tiles3 as tc
 import numpy as np
 
 
