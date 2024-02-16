@@ -18,6 +18,10 @@ class QFunction(ABC):
     def greedy_action(self, obs: Any, **kwargs):
         pass
 
+    @abstractclassmethod
+    def sample_action(self, obs: Any, **kwargs):
+        pass
+
 
 def compute_disc_mc_return(
     rewards: np.ndarray, observe_times: List[int], max_time: int
@@ -134,3 +138,9 @@ class MountainCarTileCodingQ(QFunction):
         feature = self.tile_coder.get_tiles(*obs)
         q_vals = feature @ self.parameters
         return np.argmax(q_vals)
+    
+    def sample_action(self, obs: Any, **kwargs):
+        feature = self.tile_coder.get_tiles(*obs)
+        q_vals = feature @ self.parameters
+        probs = np.exp(q_vals)/sum(np.exp(q_vals))
+        return np.random.choice(len(self.action_space), p=probs)
