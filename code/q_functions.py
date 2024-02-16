@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from typing import Any, List, Dict
 
 from features import MountainCarTileCoder
+from utils import softmax
 
 import numpy as np
 
@@ -54,7 +55,9 @@ class MountainCarTileCodingQ(QFunction):
         self.parameters = rng.randn(
             self.tile_coder.num_tilings,
             len(agent_config.action_space),
-        ) + getattr(agent_config, "param_init_mean", 0.0)
+        ) * getattr(agent_config, "param_init_std", 0.1) + getattr(
+            agent_config, "param_init_mean", 0.0
+        )
 
         if agent_config.update_rule == "monte_carlo":
             self.update = self.mc_update
@@ -192,5 +195,5 @@ class MountainCarTileCodingQ(QFunction):
     def sample_action(self, obs: Any, **kwargs):
         feature = self.tile_coder.get_tiles(*obs)
         q_vals = feature @ self.parameters
-        probs = np.exp(q_vals) / sum(np.exp(q_vals))
+        probs = softmax(q_vals)
         return np.random.choice(len(self.action_space), p=probs)

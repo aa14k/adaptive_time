@@ -8,6 +8,7 @@
         "q_function": "tile_coding",
         "update_rule": "sarsa",
         "param_init_mean": 0,
+        "param_init_std": 0.1,
         "iht_size": 4096,
         "num_tiles": 8,
         "num_tilings": 8,
