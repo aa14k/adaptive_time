@@ -58,14 +58,29 @@ class MountainCarTileCodingQ(QFunction):
     def update(
         self, trajs: Any, ep_horizons: Any, observe_times: Any, max_time: Any, **kwargs
     ) -> Dict[str, Any]:
+        """
+        Get dict of ndarrays, which results in:
+        {
+            "obss": ndarray,
+            "acts": ndarray,
+            "rews": ndarray,
+        }
+        We assume that the arrays are padded such that the horizon is consistent.
+        """
         trajs = {k: np.array([traj[k] for traj in trajs]) for k in trajs[0]}
+
+        # Compute Monte Carlo return
         rets = compute_disc_mc_return(trajs["rews"], observe_times, max_time)
+
+        # Get tile-coding features
         features = np.array(
             [
                 [self.tile_coder.get_tiles(*obs) for obs in obss]
                 for obss in trajs["obss"]
             ]
         )
+        
+        # Compute Q-values and TD errors
         q_vals = features @ self.parameters
         q_vals_act = np.take_along_axis(q_vals, trajs["acts"][..., None], axis=-1)
         ep_mask = (1 - np.eye(len(observe_times) + 1)[np.array(ep_horizons) + 1])[
@@ -76,6 +91,13 @@ class MountainCarTileCodingQ(QFunction):
         acts_one_hot = np.eye(len(self.action_space))[trajs["acts"]].reshape(
             -1, len(self.action_space), 1
         )
+
+        """
+        This is a little bit trickier...
+        We need to:
+        1. Use ep_mask to cut off transitions after termination
+        2. Use acts_one_hot to only look at Q-values of taken actions
+        """
         per_sample_update = (
             np.tile(
                 (td_error * features).reshape(-1, self.tile_coder.num_tilings)[:, None],
@@ -84,6 +106,11 @@ class MountainCarTileCodingQ(QFunction):
             * acts_one_hot
             * ep_mask
         )
+
+        """
+        Make sure the average considers the actions taken and actual horizon of the trajectories.
+        Also, make sure that actions that are never taken is not updated (through enforcing 0s).
+        """
         average_update = (
             np.sum(per_sample_update, axis=0) / np.sum(acts_one_hot * ep_mask, axis=0)
         ).T
