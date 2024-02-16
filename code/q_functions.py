@@ -53,7 +53,7 @@ class MountainCarTileCodingQ(QFunction):
         self.parameters = rng.randn(
             self.tile_coder.num_tilings,
             len(agent_config.action_space),
-        )
+        ) + getattr(agent_config, "param_init_mean", 0.0)
 
     def update(
         self, trajs: Any, ep_horizons: Any, observe_times: Any, max_time: Any, **kwargs
@@ -94,6 +94,7 @@ class MountainCarTileCodingQ(QFunction):
 
         return dict(
             mean_td_error=np.mean(td_error ** 2),
+            mean_q_vals=np.mean(q_vals, axis=(0, 1)),
             param_norms=np.linalg.norm(self.parameters, axis=0),
             update_norm=np.linalg.norm(average_update, axis=0),
             returns=np.mean(rets[:, 0]),
