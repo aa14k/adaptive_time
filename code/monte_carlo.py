@@ -36,11 +36,14 @@ def generate_traj(
         acts.extend([curr_act] * padding_to_add)
         rews.extend([0] * padding_to_add)
 
-    return {
-        "obss": np.array(obss),
-        "acts": np.array(acts),
-        "rews": np.array(rews),
-    }, horizon
+    return (
+        dict(
+            obss=np.array(obss),
+            acts=np.array(acts),
+            rews=np.array(rews),
+        ),
+        horizon,
+    )
 
 
 def observe_discrete_traj(
@@ -103,7 +106,12 @@ def mc_policy_iteration(
             if sample_i >= budget:
                 break
 
-        aux = q_function.update(disc_trajs, ep_horizons, observe_times, env.horizon)
+        aux = q_function.update(
+            disc_trajs=disc_trajs,
+            ep_horizons=ep_horizons,
+            observe_times=observe_times,
+            max_time=env.horizon,
+        )
 
         if iter_i % config.log_frequency == 0:
             print(

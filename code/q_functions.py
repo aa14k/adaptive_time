@@ -8,10 +8,7 @@ import numpy as np
 
 
 class QFunction(ABC):
-    @abstractclassmethod
-    def update(
-        self, trajs: Any, ep_horizons: Any, observe_times: Any, max_time: Any, **kwargs
-    ) -> Dict[str, Any]:
+    def update(self, **kwargs) -> Dict[str, Any]:
         pass
 
     @abstractclassmethod
@@ -59,8 +56,58 @@ class MountainCarTileCodingQ(QFunction):
             len(agent_config.action_space),
         ) + getattr(agent_config, "param_init_mean", 0.0)
 
-    def update(
-        self, trajs: Any, ep_horizons: Any, observe_times: Any, max_time: Any, **kwargs
+        if agent_config.update_rule == "monte_carlo":
+            self.update = self.mc_update
+        elif agent_config.update_rule == "sarsa":
+            self.update = self.sarsa_update
+        else:
+            raise NotImplementedError
+
+    def sarsa_update(
+        self,
+        curr_obs: Any,
+        act: Any,
+        rew: Any,
+        done: Any,
+        next_obs: Any,
+        curr_observe_sample: int,
+        next_observe_sample: int,
+        max_time: int,
+    ):
+        curr_feature = self.tile_coder.get_tiles(*curr_obs)
+        q_val = (curr_feature @ self.parameters)[act]
+
+        next_q_val = 0.0
+        if not done:
+            next_q_val = self.tile_coder.get_tiles(*next_obs) @ self.parameters
+            next_q_val = np.max(next_q_val)
+
+        td_error = (
+            (min(next_observe_sample, max_time) - curr_observe_sample) * rew + next_q_val - q_val
+        )
+        update = td_error * curr_feature
+
+        self.parameters[:, act] = (
+            self.parameters[:, act]
+            + self.agent_config.learning_rate * update
+        )
+
+        return dict(
+            td_error=td_error,
+            q_val=q_val,
+            next_q_val=next_q_val,
+            act=act,
+            param_norms=np.linalg.norm(self.parameters, axis=0),
+            update_norm=np.linalg.norm(update),
+        )
+
+    def mc_update(
+        self,
+        disc_trajs: Any,
+        ep_horizons: Any,
+        observe_times: Any,
+        max_time: Any,
+        **kwargs
     ) -> Dict[str, Any]:
         """
         Get dict of ndarrays, which results in:
@@ -71,28 +118,30 @@ class MountainCarTileCodingQ(QFunction):
         }
         We assume that the arrays are padded such that the horizon is consistent.
         """
-        trajs = {k: np.array([traj[k] for traj in trajs]) for k in trajs[0]}
+        disc_trajs = {
+            k: np.array([traj[k] for traj in disc_trajs]) for k in disc_trajs[0]
+        }
 
         # Compute Monte Carlo return
-        rets = compute_disc_mc_return(trajs["rews"], observe_times, max_time)
+        rets = compute_disc_mc_return(disc_trajs["rews"], observe_times, max_time)
 
         # Get tile-coding features
         features = np.array(
             [
                 [self.tile_coder.get_tiles(*obs) for obs in obss]
-                for obss in trajs["obss"]
+                for obss in disc_trajs["obss"]
             ]
         )
-        
+
         # Compute Q-values and TD errors
         q_vals = features @ self.parameters
-        q_vals_act = np.take_along_axis(q_vals, trajs["acts"][..., None], axis=-1)
+        q_vals_act = np.take_along_axis(q_vals, disc_trajs["acts"][..., None], axis=-1)
         ep_mask = (1 - np.eye(len(observe_times) + 1)[np.array(ep_horizons) + 1])[
             ..., :-1
         ].reshape(-1, 1, 1)
 
         td_error = rets[..., None] - q_vals_act
-        acts_one_hot = np.eye(len(self.action_space))[trajs["acts"]].reshape(
+        acts_one_hot = np.eye(len(self.action_space))[disc_trajs["acts"]].reshape(
             -1, len(self.action_space), 1
         )
 
@@ -138,9 +187,9 @@ class MountainCarTileCodingQ(QFunction):
         feature = self.tile_coder.get_tiles(*obs)
         q_vals = feature @ self.parameters
         return np.argmax(q_vals)
-    
+
     def sample_action(self, obs: Any, **kwargs):
         feature = self.tile_coder.get_tiles(*obs)
         q_vals = feature @ self.parameters
-        probs = np.exp(q_vals)/sum(np.exp(q_vals))
+        probs = np.exp(q_vals) / sum(np.exp(q_vals))
         return np.random.choice(len(self.action_space), p=probs)

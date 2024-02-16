@@ -6,7 +6,7 @@
     "seed": 42,
     "agent_config": {
         "q_function": "tile_coding",
-        "update_rule": "monte_carlo",
+        "update_rule": "sarsa",
         "param_init_mean": 1,
         "iht_size": 4096,
         "num_tiles": 14,
@@ -16,6 +16,5 @@
         "seed": 43
     },
     "budget": 5000000,
-    "num_trajs_per_update": 10,
     "log_frequency": 10
 }

@@ -8,6 +8,7 @@ import numpy as np
 
 from environment import MountainCar
 from monte_carlo import mc_policy_iteration
+from sarsa import sarsa
 from q_functions import MountainCarTileCodingQ
 
 
@@ -55,12 +56,22 @@ def main(args):
         q_function = MountainCarTileCodingQ(config.agent_config)
         env = MountainCar(**vars(config.env_kwargs))
 
-    mc_policy_iteration(
-        env=env,
-        q_function=q_function,
-        observation_sampler=observation_sampler,
-        config=config,
-    )
+    if config.agent_config.update_rule == "monte_carlo":
+        mc_policy_iteration(
+            env=env,
+            q_function=q_function,
+            observation_sampler=observation_sampler,
+            config=config,
+        )
+    elif config.agent_config.update_rule == "sarsa":
+        sarsa(
+            env=env,
+            q_function=q_function,
+            observation_sampler=observation_sampler,
+            config=config,
+        )
+    else:
+        raise NotImplementedError
 
 
 if __name__ == "__main__":
@@ -68,7 +79,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config_path",
         type=str,
-        default="configs/mc_tilecoding.json",
+        required=True,
         help="The experiment configuration path",
     )
     args = parser.parse_args()
