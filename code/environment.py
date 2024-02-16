@@ -5,6 +5,7 @@ class MountainCar(object):
     def __init__(self, horizon_sec=200., dt_sec=1.0):
         self.horizon_sec = horizon_sec
         self.dt_sec = dt_sec
+        self.horizon = int(horizon_sec / dt_sec)
         self.means = np.array([0, 1.0])
         self.reset()
 
@@ -15,11 +16,13 @@ class MountainCar(object):
         self.vel = 0.0
         self.done = False
         self.h = 0
+        self.h_disc = -1
         return [self.pos, self.vel]
 
     def step(self, action):
         action = [-1, 0, 1][action]
         self.h += self.dt_sec
+        self.h_disc += 1
         self.vel = max(min(
             (self.vel + self.dt_sec *(0.001 * action + -0.0025 * np.cos(3 * self.pos))),
             0.07),-0.07)
@@ -36,7 +39,7 @@ class MountainCar(object):
         if self.h + self.dt_sec > self.horizon_sec:
             self.done = True
 
-        return reward, np.array([self.pos, self.vel]), self.h, self.done
+        return reward, np.array([self.pos, self.vel]), (self.h, self.h_disc), self.done
 
 
     # Code for broadcasting Mountain Car, might be useful later.

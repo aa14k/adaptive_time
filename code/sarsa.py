@@ -64,7 +64,7 @@ def sarsa(
         traj_i = 0
         next_observe_sample = observe_times[step_i]
 
-        # TODO: Modify to account edge case (i.e. sample t=0)
+        # TODO: Modify to account for edge case (i.e. sample t=0)
         # Observe next observation based on suggested observation time
         disc_tx, observed_time = generate_transition(
             env,

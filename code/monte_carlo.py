@@ -25,7 +25,7 @@ def generate_traj(
     horizon = 0
     while not done:
         curr_act = q_function.greedy_action(curr_obs)
-        reward, curr_obs, horizon, done = env.step(curr_act)
+        reward, curr_obs, (_, horizon), done = env.step(curr_act)
         obss.append(curr_obs)
         acts.append(curr_act)
         rews.append(reward)
