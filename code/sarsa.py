@@ -23,7 +23,7 @@ def generate_transition(
     """
     done = False
     while not done and last_observe_time < observe_time:
-        curr_act = q_function.greedy_action(curr_obs)
+        curr_act = q_function.sample_action(curr_obs)
         rew, curr_obs, _, done = env.step(curr_act)
         last_observe_time += 1
 

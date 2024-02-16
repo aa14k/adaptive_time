@@ -8,6 +8,7 @@
         "q_function": "tile_coding",
         "update_rule": "monte_carlo",
         "param_init_mean": 1,
+        "param_init_std": 0.1,
         "iht_size": 4096,
         "num_tiles": 14,
         "num_tilings": 7,
