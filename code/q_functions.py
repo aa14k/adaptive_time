@@ -96,6 +96,7 @@ class MountainCarTileCodingQ(QFunction):
             td_error=td_error,
             q_val=q_val,
             next_q_val=next_q_val,
+            rew=rew,
             act=act,
             param_norms=np.linalg.norm(self.parameters, axis=0),
             update_norm=np.linalg.norm(update),

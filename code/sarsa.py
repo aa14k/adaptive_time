@@ -23,7 +23,7 @@ def generate_transition(
     """
     done = False
     curr_time = 0
-    while not done or curr_time < observe_time:
+    while not done and curr_time < observe_time:
         curr_act = q_function.greedy_action(curr_obs)
         rew, curr_obs, _, done = env.step(curr_act)
         curr_time += 1
@@ -59,10 +59,12 @@ def sarsa(
     observe_times = observation_sampler.sample_time()
     curr_observe_sample = 0
     ep_returns = [0]
+
     while sample_i < budget:
         traj_i = 0
         next_observe_sample = observe_times[step_i]
 
+        # TODO: Modify to account edge case (i.e. sample t=0)
         # Observe next observation based on suggested observation time
         disc_tx, observed_time = generate_transition(
             env,
@@ -79,6 +81,7 @@ def sarsa(
         )
 
         curr_obs = disc_tx["next_obs"]
+
         ep_returns[-1] += disc_tx["rew"] * (observed_time - curr_observe_sample)
         curr_observe_sample = observed_time
 
@@ -89,6 +92,7 @@ def sarsa(
             ep_returns.append(0)
             curr_observe_sample = 0
             curr_obs = env.reset()
+            print("RESET")
             observe_times = observation_sampler.sample_time()
 
         if sample_i % config.log_frequency == 0:
