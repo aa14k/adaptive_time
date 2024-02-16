@@ -93,12 +93,14 @@ class MountainCarTileCodingQ(QFunction):
         )
 
         return dict(
-            mean_td_error=np.mean(td_error ** 2),
+            mean_td_error=np.mean(td_error**2),
             mean_q_vals=np.mean(q_vals, axis=(0, 1)),
             param_norms=np.linalg.norm(self.parameters, axis=0),
             update_norm=np.linalg.norm(average_update, axis=0),
             returns=np.mean(rets[:, 0]),
-            action_frequency=np.mean(acts_one_hot, axis=0).T,
+            action_frequency=(
+                np.sum(acts_one_hot * ep_mask, axis=0) / np.sum(ep_mask, axis=0)
+            ).T,
         )
 
     def greedy_action(self, obs: Any, **kwargs):
