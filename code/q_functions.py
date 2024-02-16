@@ -137,9 +137,9 @@ class MountainCarTileCodingQ(QFunction):
         # Compute Q-values and TD errors
         q_vals = features @ self.parameters
         q_vals_act = np.take_along_axis(q_vals, disc_trajs["acts"][..., None], axis=-1)
-        ep_mask = (1 - np.eye(len(observe_times) + 1)[np.array(ep_horizons) + 1])[
+        ep_mask = (1 - np.eye(max_time + 1)[np.array(ep_horizons) + 1])[
             ..., :-1
-        ].reshape(-1, 1, 1)
+        ][:, observe_times].reshape(-1, 1, 1)
 
         td_error = rets[..., None] - q_vals_act
         acts_one_hot = np.eye(len(self.action_space))[disc_trajs["acts"]].reshape(
