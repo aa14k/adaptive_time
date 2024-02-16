@@ -46,7 +46,11 @@ def main(args):
             self.num_steps = num_steps
 
         def sample_time(self):
+<<<<<<< HEAD
             return np.arange(0, self.num_steps, 2)
+=======
+            return np.arange(self.num_steps)
+>>>>>>> main
 
     # TODO: Better way to construct these objects
     observation_sampler = MockSampler(config.env_kwargs.horizon)
@@ -56,6 +60,7 @@ def main(args):
         q_function = MountainCarTileCodingQ(config.agent_config)
         env = MountainCar(**vars(config.env_kwargs))
 
+<<<<<<< HEAD
     if config.agent_config.update_rule == "monte_carlo":
         mc_policy_iteration(
             env=env,
@@ -72,6 +77,14 @@ def main(args):
         )
     else:
         raise NotImplementedError
+=======
+    mc_policy_iteration(
+        env=env,
+        q_function=q_function,
+        observation_sampler=observation_sampler,
+        config=config,
+    )
+>>>>>>> main
 
 
 if __name__ == "__main__":
@@ -79,7 +92,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config_path",
         type=str,
+<<<<<<< HEAD
         required=True,
+=======
+        default="configs/mc_tilecoding.json",
+>>>>>>> main
         help="The experiment configuration path",
     )
     args = parser.parse_args()
