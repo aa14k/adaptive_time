@@ -6,6 +6,7 @@ import numpy as np
 
 from code.environment import MountainCar
 from code.monte_carlo import mc_policy_iteration
+from code.samplers import UniformSampler
 from code.sarsa import sarsa
 from code.q_functions import MountainCarTileCodingQ
 from code.utils import parse_dict
@@ -20,18 +21,21 @@ def main(args):
 
     np.random.seed(config.seed)
 
-    # TODO: Replace this with regulator
-    class MockSampler:
-        def __init__(self, num_steps: int):
-            self.num_steps = num_steps
-
-        def sample_time(self):
-            return np.arange(0, self.num_steps, 2)
-
     # TODO: Better way to construct these objects
-    observation_sampler = MockSampler(config.env_kwargs.horizon_sec)
+
+    # Construct observation sampler
+    if config.sampler_config.sampler == "uniform":
+        observation_sampler = UniformSampler(
+            config.env_kwargs.horizon_sec,
+            config.sampler_config.sampler_kwargs.spacing,
+        )
+    else:
+        raise NotImplementedError
+
+    # Construct Q-function and environment
     q_function = None
     env = None
+
     if config.env == "mountain_car":
         q_function = MountainCarTileCodingQ(config.agent_config)
         env = MountainCar(**vars(config.env_kwargs))

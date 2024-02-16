@@ -16,6 +16,8 @@ def generate_traj(
     - q_function (Any): The Q-function to learn from
     - max_horizon (int): Maximum horizon of the environment
 
+    NOTE: Right now we are not doing action repeat, but running the "continuous-time" policy
+
     """
     curr_obs = env.reset()
     done = False
