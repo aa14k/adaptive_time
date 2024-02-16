@@ -22,7 +22,7 @@ class MountainCar(object):
         self.vel = max(min(
             self.vel + 0.001 * action + -0.0025 * np.cos(3 * self.pos),
             0.07),-0.07)
-        cost = 0
+        reward = 0
         
         if self.pos > 0.6:
             self.pos = 0.6

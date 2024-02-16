@@ -97,6 +97,7 @@ class MountainCarTileCodingQ(QFunction):
             param_norms=np.linalg.norm(self.parameters, axis=0),
             update_norm=np.linalg.norm(average_update, axis=0),
             returns=np.mean(rets[:, 0]),
+            action_frequency=np.mean(acts_one_hot, axis=0).T,
         )
 
     def greedy_action(self, obs: Any, **kwargs):
