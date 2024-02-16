@@ -138,7 +138,7 @@ class MountainCarTileCodingQ(QFunction):
         }
 
         # Compute Monte Carlo return
-        rets = compute_disc_mc_return(disc_trajs["rews"], observe_times, max_time)
+        rets = compute_disc_mc_return(disc_trajs["rews"], observe_times, max_time - 1)
 
         # Get tile-coding features
         features = np.array(

@@ -109,7 +109,7 @@ def sarsa(
 
             curr_obs = env.reset()
             observe_times = observation_sampler.sample_time()
-            ep_returns = [0]
+            ep_returns.append(0)
 
             curr_tx, observed_time = generate_transition(
                 env,
