@@ -10,7 +10,7 @@
         "param_init_mean": 0,
         "param_init_std": 0.1,
         "iht_size": 4096,
-        "num_tiles": 8,
+        "num_tiles": 14,
         "num_tilings": 8,
         "learning_rate": 3e-4,
         "action_space": [-1, 0, 1],
