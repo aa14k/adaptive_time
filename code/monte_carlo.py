@@ -106,6 +106,7 @@ def mc_policy_iteration(
         aux = q_function.update(disc_trajs, ep_horizons, observe_times, env.horizon)
 
         if iter_i % config.log_frequency == 0:
+            print("Iteration {} ========================================".format(iter_i))
             pprint(aux)
 
         iter_i += 1
