@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
-from q_functions import QFunction
+from code.q_functions import QFunction
 
 
 def generate_traj(

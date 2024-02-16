@@ -2,8 +2,8 @@ from abc import ABC, abstractclassmethod
 from types import SimpleNamespace
 from typing import Any, List, Dict
 
-from features import MountainCarTileCoder
-from utils import softmax
+from code.features import MountainCarTileCoder
+from code.utils import softmax
 
 import numpy as np
 
@@ -50,6 +50,7 @@ class MountainCarTileCodingQ(QFunction):
             num_tilings=getattr(agent_config, "num_tilings", 8),
             num_tiles=getattr(agent_config, "num_tiles", 8),
         )
+        print(agent_config)
         rng = np.random.RandomState(agent_config.seed)
         self.action_space = agent_config.action_space
         self.parameters = rng.randn(
