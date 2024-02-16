@@ -2,4 +2,4 @@
 
 1. numpy
 2. tqdm
-3. 
+3. black (for formatting)
