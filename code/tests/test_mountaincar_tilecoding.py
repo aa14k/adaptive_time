@@ -22,8 +22,8 @@ class Test(unittest.TestCase):
             "param_init_mean": 1,
             "param_init_std": 0.1,
             "iht_size": 4096,
-            "num_tiles": 14,
-            "num_tilings": 7,
+            "num_tiles": 2,
+            "num_tilings": 2,
             "learning_rate": 3e-4,
             "action_space": [-1, 0, 1],
             "seed": 43,
@@ -31,14 +31,15 @@ class Test(unittest.TestCase):
         q_function = MountainCarTileCodingQ(parse_dict(q_config))
         q_function.parameters = np.ones(q_function.parameters.shape)
 
-        obss = np.arange(10).reshape((5, 2)) * 0.05
-        features = [q_function.tile_coder.get_tiles(*obs) for obs in obss]
+        obss = np.arange(10).reshape((5, 2)) * 0.005
+        features = [q_function.get_feature(obs) for obs in obss]
         acts = [0, 1, 2, 0, 1]
         rews = [0, 0, 0, 0, 1]
         max_time = 5
         observe_times = [0, 1, 2]
 
-        print(features)
+        from pprint import pprint
+        pprint(features)
         assert 0
 
         self.assertEqual(rewards, expected_rewards)

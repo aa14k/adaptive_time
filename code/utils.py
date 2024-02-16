@@ -31,3 +31,14 @@ def softmax(x: np.ndarray) -> np.ndarray:
     """
     z = x - np.max(x, axis=-1)
     return np.exp(z) / np.sum(np.exp(z), axis=-1)
+
+
+def argmax(x: np.ndarray) -> np.ndarray:
+    """
+    Argmax operation on the last axis---randomly break ties
+    - x (np.ndarray): values
+
+    """
+    max_val = np.max(x, axis=-1)
+    idxes = np.where(x == max_val)[0]
+    return np.random.choice(idxes)
