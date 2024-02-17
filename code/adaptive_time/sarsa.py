@@ -7,13 +7,13 @@ import numpy as np
 from adaptive_time.q_functions import QFunction
 
 
-# TODO: could add another variant of the function using sticky actions.
 def generate_transition(
     env: Any,
     curr_obs: Any,
     q_function: Any,
     last_observe_time: int,
     observe_time: int,
+    use_action_repeat: bool,
 ) -> Tuple[Dict[str, Any], int]:
     """
     Generate a trajectory from the environment using the most fine-grain timescale
@@ -21,12 +21,16 @@ def generate_transition(
     - q_function (Any): The Q-function to learn from
     - last_observe_time (int): The last sample observation time
     - observe_time (int): The sample observation time
+    - use_action_repeat (bool): Whether to use action repeat, or get a chance to
+        re-sample the action at each time step.
 
     """
     done = False
     init_obs = curr_obs
+    curr_act = q_function.greedy_action(curr_obs)
     while not done and last_observe_time < observe_time:
-        curr_act = q_function.greedy_action(curr_obs)
+        if not use_action_repeat:
+            curr_act = q_function.greedy_action(curr_obs)
         # TODO: in mountain car we do not need to sum and normalize the rewards,
         # but in general we will need to do that.
         rew, curr_obs, _, done = env.step(curr_act)
@@ -55,6 +59,8 @@ def sarsa(
     - config (SimpleNamespace): The configuration of the learning algorithm
 
     config.budget: total number of samples we can observe
+    config.use_action_repeat: whether to use action repeat, or get a chance to re-sample
+        the action at each time step
 
     Returns:
     - cum_samples (List[int]): The number of total samples seen by the end of each episode.
@@ -62,6 +68,7 @@ def sarsa(
     """
 
     budget = config.budget
+    use_action_repeat = config.use_action_repeat
 
     sample_i = 0
 
@@ -78,6 +85,7 @@ def sarsa(
         q_function,
         -1,
         observe_times[0],
+        use_action_repeat,
     )
     step_i = 1
     curr_observe_sample = observed_time
@@ -100,6 +108,7 @@ def sarsa(
             q_function,
             curr_observe_sample,
             next_observe_sample,
+            use_action_repeat,
         )
         aux = q_function.update(
             curr_tx,
@@ -132,6 +141,7 @@ def sarsa(
                 q_function,
                 -1,
                 observe_times[0],
+                use_action_repeat,
             )
             step_i = 1
             curr_observe_sample = observed_time
