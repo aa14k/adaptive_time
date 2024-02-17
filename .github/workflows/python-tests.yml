@@ -45,4 +45,4 @@ jobs:
         echo "Directory"
         echo "${{ github.workspace }}"
         echo `ls`
-        python -m unittest adaptive_time.tests *.py
+        python -m unittest tests/*.py
