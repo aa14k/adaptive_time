@@ -4,12 +4,17 @@
 2. tqdm
 3. black (for formatting)
 
+# Installation
+```
+pip install -e .
+```
+
 # Running
 ```
-python -m code.main --config_path=./code/configs/sarsa_tilecoding.json
+python main.py --config_path=./configs/sarsa_tilecoding.json
 ```
 
 # Testing
 ```
-python -m unittest code/tests/*.py
+python -m unittest tests/*.py
 ```
