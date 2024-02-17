@@ -3,7 +3,7 @@
     "env_kwargs": {
         "horizon_sec": 200,
         "dt_sec": 1.0,
-        "es": 500
+        "es": 200
     },
     "seed": 42,
     "agent_config": {
