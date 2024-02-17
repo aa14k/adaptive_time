@@ -7,6 +7,7 @@ import numpy as np
 from adaptive_time.q_functions import QFunction
 
 
+# TODO: could add another variant of the function using sticky actions.
 def generate_transition(
     env: Any,
     curr_obs: Any,
@@ -26,6 +27,8 @@ def generate_transition(
     init_obs = curr_obs
     while not done and last_observe_time < observe_time:
         curr_act = q_function.greedy_action(curr_obs)
+        # TODO: in mountain car we do not need to sum and normalize the rewards,
+        # but in general we will need to do that.
         rew, curr_obs, _, done = env.step(curr_act)
         last_observe_time += 1
 
@@ -43,7 +46,7 @@ def generate_transition(
 
 def sarsa(
     env: Any, q_function: QFunction, observation_sampler: Any, config: SimpleNamespace
-):
+) -> Tuple[List[int], List[float]]:
     """
     Runs SARSA
     - env (Any): An environment that somewhat follows Gym API
@@ -53,6 +56,9 @@ def sarsa(
 
     config.budget: total number of samples we can observe
 
+    Returns:
+    - cum_samples (List[int]): The number of total samples seen by the end of each episode.
+    - ep_returns (List[float]): The returns of each (complete) episode.
     """
 
     budget = config.budget
@@ -61,7 +67,10 @@ def sarsa(
 
     curr_obs = env.reset()
     observe_times = observation_sampler.sample_time()
-    ep_returns = [0]
+    cur_ep_return = 0
+
+    ep_returns = []
+    cum_samples = []
 
     curr_tx, observed_time = generate_transition(
         env,
@@ -99,7 +108,7 @@ def sarsa(
             next_observe_sample=observed_time,
             max_time=env.horizon,
         )
-        ep_returns[-1] += curr_tx["rew"] * (observed_time - curr_observe_sample)
+        cur_ep_return += curr_tx["rew"] * (observed_time - curr_observe_sample)
 
         curr_obs = next_tx["next_obs"]
         curr_observe_sample = observed_time
@@ -107,11 +116,15 @@ def sarsa(
 
         step_i += 1
         if curr_tx["done"]:
+            # The episode ended.
             traj_i += 1
 
             curr_obs = env.reset()
             observe_times = observation_sampler.sample_time()
-            ep_returns.append(0)
+
+            cum_samples.append(sample_i+1)
+            ep_returns.append(cur_ep_return)
+            cur_ep_return = 0
 
             curr_tx, observed_time = generate_transition(
                 env,
@@ -134,3 +147,5 @@ def sarsa(
             print("Most recent 5 returns: {}".format(ep_returns[-6:-1]))
 
         sample_i += 1
+
+    return cum_samples, ep_returns
