@@ -40,7 +40,7 @@ def main(args):
     else:
         raise NotImplementedError
 
-    if config.agent_config.update_rule == "monte_carlo":
+    if config.agent_config.update_rule.endswith("monte_carlo"):
         mc_policy_iteration(
             env=env,
             q_function=q_function,

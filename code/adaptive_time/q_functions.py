@@ -66,6 +66,8 @@ class MountainCarTileCodingQ(QFunction):
 
         if agent_config.update_rule == "monte_carlo":
             self.update = self.mc_update
+        elif agent_config.update_rule == "batched_monte_carlo":
+            self.update = self.batched_mc_update
         elif agent_config.update_rule == "sarsa":
             self.update = self.sarsa_update
         else:
@@ -191,7 +193,6 @@ class MountainCarTileCodingQ(QFunction):
             self.parameters = (
                 self.parameters + self.agent_config.learning_rate * average_update
             )
-            # print(average_update[np.where(curr_features != 0)[-1]][:, curr_acts], curr_acts, np.where(curr_features != 0)[-1])
 
             average_updates.append(average_update)
             action_frequencies += np.sum(

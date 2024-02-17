@@ -8,7 +8,7 @@
     "seed": 42,
     "agent_config": {
         "q_function": "tile_coding",
-        "update_rule": "monte_carlo",
+        "update_rule": "batched_monte_carlo",
         "param_init_mean": 10,
         "param_init_std": 0.0,
         "iht_size": 4096,
