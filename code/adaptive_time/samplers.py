@@ -29,11 +29,14 @@ class AdaptiveQuadratureSampler(Sampler):
         num_steps: int,
         tolerance_init: float,
         integral_rule: str = "trapezoid",
+        update_when_best: bool = True,
     ):
         self.dt = dt
         self.num_steps = num_steps
         self.tolerance_init = tolerance_init
         self._sample_times = np.arange(num_steps)
+        self.best_rew = -np.inf
+        self.update_when_best = update_when_best
 
         if integral_rule == "trapezoid":
             self.integral_rule = self._trapezoid_rule
@@ -84,7 +87,13 @@ class AdaptiveQuadratureSampler(Sampler):
         sample_times, total_seg, num_calls = self._adapt(
             rews, 0, self.num_steps + 1, curr_seg, self.tolerance_init
         )
-        self._sample_times = np.concatenate(([0], sample_times)).astype(int)
+        if self.update_when_best:
+            total_reward = np.sum(rews)
+            if self.best_rew <= total_reward:
+                self._sample_times = np.concatenate(([0], sample_times)).astype(int)
+                self.best_rew = total_reward
+        else:
+            self._sample_times = np.concatenate(([0], sample_times)).astype(int)
         return sample_times, total_seg, num_calls
 
     def sample_time(self):

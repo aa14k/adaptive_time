@@ -22,7 +22,8 @@
         "sampler": "adaptive_quadrature",
         "sampler_kwargs": {
             "tolerance_init": 0.0005,
-            "integral_rule": "trapezoid"
+            "integral_rule": "trapezoid",
+            "update_when_best": false
         }
     },
     "budget": 200000,

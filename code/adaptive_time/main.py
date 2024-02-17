@@ -43,6 +43,7 @@ def main(args):
             num_steps=env.horizon - 1,
             tolerance_init=config.sampler_config.sampler_kwargs.tolerance_init,
             integral_rule=config.sampler_config.sampler_kwargs.integral_rule,
+            update_when_best=config.sampler_config.sampler_kwargs.update_when_best,
         )
     else:
         raise NotImplementedError
