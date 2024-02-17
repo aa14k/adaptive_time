@@ -16,7 +16,6 @@ class MountainCar(object):
         # self.pos = np.random.uniform(low=-1.2,high=0.3)
         # self.vel = np.random.uniform(low=-0.07,high=0.07)
         if episode_i < self.es:
-            print("ES")
             self.pos = np.random.uniform(low=-1.2, high=0.6)
             self.vel = np.random.uniform(low=-0.07, high=0.07)
         else:
