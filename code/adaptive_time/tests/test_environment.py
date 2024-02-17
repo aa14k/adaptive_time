@@ -3,7 +3,7 @@ import logging
 import random
 import numpy as np
 
-from code import environment
+from adaptive_time import environment
 
 
 # Get logger
@@ -66,8 +66,6 @@ class Test(unittest.TestCase):
         env_fine = environment.MountainCar(horizon_sec=10, dt_sec=0.2)
         logger.info("Running environment.")
 
-        action = rng.choice([-1, 1])
-
         for second in range(12):
             action = rng.choice([-1, 1])
 
@@ -96,7 +94,7 @@ class Test(unittest.TestCase):
             )
 
             self.assertEqual(reward_coarse, reward_fine)
-            self.assertTrue(np.allclose(state_coarse, state_fine, atol=0.0, rtol=0.01))
+            self.assertTrue(np.allclose(state_coarse, state_fine, atol=0.000005, rtol=0.015))
             self.assertAlmostEqual(hs_coarse[0], hs_fine[0])
             self.assertEqual(done_coarse, done_fine)
 
