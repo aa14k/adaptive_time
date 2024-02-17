@@ -30,7 +30,7 @@ def main(args):
     if config.env == "mountain_car":
         q_function = MountainCarTileCodingQ(config.agent_config)
         env = MountainCar(**vars(config.env_kwargs))
-    
+
     # Construct observation sampler
     if config.sampler_config.sampler == "uniform":
         observation_sampler = UniformSampler(

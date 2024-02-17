@@ -23,5 +23,6 @@
         }
     },
     "budget": 200000,
+    "use_action_repeat": false,
     "log_frequency": 10000
 }

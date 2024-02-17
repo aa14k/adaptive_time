@@ -8,7 +8,11 @@ from adaptive_time.q_functions import QFunction
 
 
 def generate_traj(
-    env: Any, q_function: Any, max_horizon: int = None, action_repeat: int = 1, episode_i: int = 50,
+    env: Any,
+    q_function: Any,
+    max_horizon: int = None,
+    action_repeat: int = 1,
+    episode_i: int = 50,
 ) -> Tuple[Dict[str, Any], int]:
     """
     Generate a trajectory from the environment using the most fine-grain timescale
@@ -95,7 +99,12 @@ def mc_policy_iteration(
         ep_horizons = []
         while traj_i < num_trajs_per_update:
             # Observe "continuous-time" trajectory
-            cont_traj, horizon = generate_traj(env, q_function, env.horizon, episode_i=iter_i * num_trajs_per_update + traj_i)
+            cont_traj, horizon = generate_traj(
+                env,
+                q_function,
+                env.horizon,
+                episode_i=iter_i * num_trajs_per_update + traj_i,
+            )
             cont_trajs.append(cont_traj)
 
             # Discretize trajectory
@@ -117,6 +126,7 @@ def mc_policy_iteration(
             ep_horizons=ep_horizons,
             observe_times=observe_times,
             max_time=env.horizon,
+            dt=env.dt_sec,
         )
 
         if iter_i % config.log_frequency == 0:

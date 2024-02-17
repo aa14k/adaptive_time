@@ -33,6 +33,7 @@ jobs:
           echo "Cannot find code/requirements.txt, failing."
           exit 1
         fi
+        python -m pip install -e code  # Installs `adaptive_time`        
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -44,4 +45,6 @@ jobs:
         echo "Directory"
         echo "${{ github.workspace }}"
         echo `ls`
-        python -m unittest
+        cd "code"
+        echo `ls`
+        python -m unittest adaptive_time/tests/*.py
