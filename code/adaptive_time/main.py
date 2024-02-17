@@ -6,7 +6,7 @@ import numpy as np
 
 from adaptive_time.environment import MountainCar
 from adaptive_time.monte_carlo import mc_policy_iteration
-from adaptive_time.samplers import UniformSampler
+from adaptive_time.samplers import UniformSampler, AdaptiveQuadratureSampler
 from adaptive_time.sarsa import sarsa
 from adaptive_time.q_functions import MountainCarTileCodingQ
 from adaptive_time.utils import parse_dict
@@ -36,6 +36,13 @@ def main(args):
         observation_sampler = UniformSampler(
             env.horizon - 1,
             config.sampler_config.sampler_kwargs.spacing,
+        )
+    elif config.sampler_config.sampler == "adaptive_quadrature":
+        observation_sampler = AdaptiveQuadratureSampler(
+            dt=env.dt_sec,
+            num_steps=env.horizon - 1,
+            tolerance_init=config.sampler_config.sampler_kwargs.tolerance_init,
+            integral_rule=config.sampler_config.sampler_kwargs.integral_rule,
         )
     else:
         raise NotImplementedError

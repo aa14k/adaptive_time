@@ -128,6 +128,7 @@ def mc_policy_iteration(
             max_time=env.horizon,
             dt_sec=env.dt_sec,
         )
+        observation_sampler.adapt(trajs=cont_trajs)
 
         if iter_i % config.log_frequency == 0:
             print(
