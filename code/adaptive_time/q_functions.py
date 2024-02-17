@@ -140,7 +140,7 @@ class MountainCarTileCodingQ(QFunction):
             k: np.array([traj[k] for traj in disc_trajs]) for k in disc_trajs[0]
         }
 
-        print(ep_horizons)
+        # print(ep_horizons)
         if ep_horizons[0] < 199:
             import ipdb
 

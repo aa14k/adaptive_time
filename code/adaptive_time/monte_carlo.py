@@ -33,10 +33,10 @@ def generate_traj(
         for _ in range(action_repeat + 1):
             reward, curr_obs, (_, horizon), done = env.step(curr_act)
             obss.append(curr_obs)
-            print(curr_obs)
+            # print(curr_obs)
             acts.append(curr_act)
             rews.append(reward)
-            print(horizon, done, reward)
+            # print(horizon, done, reward)
             if done:
                 break
 
@@ -126,7 +126,7 @@ def mc_policy_iteration(
             ep_horizons=ep_horizons,
             observe_times=observe_times,
             max_time=env.horizon,
-            dt=env.dt_sec,
+            dt_sec=env.dt_sec,
         )
 
         if iter_i % config.log_frequency == 0:
