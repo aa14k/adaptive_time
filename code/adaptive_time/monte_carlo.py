@@ -4,19 +4,18 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
-from code.q_functions import QFunction
+from adaptive_time.q_functions import QFunction
 
 
 def generate_traj(
-    env: Any, q_function: Any, max_horizon: int = None
+    env: Any, q_function: Any, max_horizon: int = None, action_repeat: int = 5, global_step: int = 1,
 ) -> Tuple[Dict[str, Any], int]:
     """
     Generate a trajectory from the environment using the most fine-grain timescale
     - env (Any): An environment that somewhat follows Gym API
     - q_function (Any): The Q-function to learn from
     - max_horizon (int): Maximum horizon of the environment
-
-    NOTE: Right now we are not doing action repeat, but running the "continuous-time" policy
+    - action_repeat (int): repeat action N times
 
     """
     curr_obs = env.reset()
@@ -26,11 +25,16 @@ def generate_traj(
     rews = []
     horizon = 0
     while not done:
-        curr_act = q_function.greedy_action(curr_obs)
-        reward, curr_obs, (_, horizon), done = env.step(curr_act)
-        obss.append(curr_obs)
-        acts.append(curr_act)
-        rews.append(reward)
+        curr_act = q_function.sample_action(curr_obs, temperature=10000/global_step)
+        # curr_act = q_function.greedy_action(curr_obs)
+        global_step += 1
+        for _ in range(action_repeat + 1):
+            reward, curr_obs, (_, horizon), done = env.step(curr_act)
+            obss.append(curr_obs)
+            acts.append(curr_act)
+            rews.append(reward)
+            if done:
+                break
 
     if max_horizon is not None:
         padding_to_add = max_horizon - horizon - 1
@@ -91,7 +95,7 @@ def mc_policy_iteration(
         ep_horizons = []
         while traj_i < num_trajs_per_update:
             # Observe "continuous-time" trajectory
-            cont_traj, horizon = generate_traj(env, q_function, env.horizon)
+            cont_traj, horizon = generate_traj(env, q_function, env.horizon, global_step=max(1, sample_i))
             cont_trajs.append(cont_traj)
 
             # Discretize trajectory

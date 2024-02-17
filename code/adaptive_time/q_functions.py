@@ -2,8 +2,8 @@ from abc import ABC, abstractclassmethod
 from types import SimpleNamespace
 from typing import Any, List, Dict
 
-from code.features import MountainCarTileCoder
-from code.utils import softmax, argmax
+from adaptive_time.features import MountainCarTileCoder
+from adaptive_time.utils import softmax, argmax
 
 import numpy as np
 
@@ -148,6 +148,10 @@ class MountainCarTileCodingQ(QFunction):
             :, observe_times
         ].reshape(-1, 1, 1)
 
+        # import ipdb
+        # ipdb.set_trace()
+
+        print(rets, len(rets[0]))
         td_error = rets[..., None] - q_vals_act
         acts_one_hot = np.eye(len(self.action_space))[disc_trajs["acts"]].reshape(
             -1, len(self.action_space), 1
@@ -196,8 +200,9 @@ class MountainCarTileCodingQ(QFunction):
         q_vals = feature @ self.parameters
         return argmax(q_vals)
 
-    def sample_action(self, obs: Any, **kwargs):
+    def sample_action(self, obs: Any, temperature: float=1, **kwargs):
         feature = self.get_feature(obs)
         q_vals = feature @ self.parameters
-        probs = softmax(q_vals)
+        print("Temp: {}".format(temperature))
+        probs = softmax(q_vals / temperature)
         return np.random.choice(len(self.action_space), p=probs)

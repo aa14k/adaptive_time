@@ -3,8 +3,8 @@ import logging
 import random
 import numpy as np
 
-from code.q_functions import MountainCarTileCodingQ
-from code.utils import parse_dict
+from adaptive_time.q_functions import MountainCarTileCodingQ
+from adaptive_time.utils import parse_dict
 
 
 # Get logger
