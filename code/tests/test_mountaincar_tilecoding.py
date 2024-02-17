@@ -42,5 +42,5 @@ class Test(unittest.TestCase):
         pprint(features)
         self.fail()
 
-        self.assertEqual(rewards, expected_rewards)
-        self.assertTrue(np.allclose(states, expected_states))
+        # self.assertEqual(rewards, expected_rewards)
+        # self.assertTrue(np.allclose(states, expected_states))
