@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
 
         from pprint import pprint
         pprint(features)
-        assert 0
+        self.fail()
 
         self.assertEqual(rewards, expected_rewards)
         self.assertTrue(np.allclose(states, expected_states))
