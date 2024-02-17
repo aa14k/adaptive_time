@@ -4,12 +4,12 @@ import argparse
 import json
 import numpy as np
 
-from code.environment import MountainCar
-from code.monte_carlo import mc_policy_iteration
-from code.samplers import UniformSampler
-from code.sarsa import sarsa
-from code.q_functions import MountainCarTileCodingQ
-from code.utils import parse_dict
+from adaptive_time.environment import MountainCar
+from adaptive_time.monte_carlo import mc_policy_iteration
+from adaptive_time.samplers import UniformSampler
+from adaptive_time.sarsa import sarsa
+from adaptive_time.q_functions import MountainCarTileCodingQ
+from adaptive_time.utils import parse_dict
 
 
 def main(args):
@@ -23,15 +23,6 @@ def main(args):
 
     # TODO: Better way to construct these objects
 
-    # Construct observation sampler
-    if config.sampler_config.sampler == "uniform":
-        observation_sampler = UniformSampler(
-            config.env_kwargs.horizon_sec,
-            config.sampler_config.sampler_kwargs.spacing,
-        )
-    else:
-        raise NotImplementedError
-
     # Construct Q-function and environment
     q_function = None
     env = None
@@ -39,6 +30,15 @@ def main(args):
     if config.env == "mountain_car":
         q_function = MountainCarTileCodingQ(config.agent_config)
         env = MountainCar(**vars(config.env_kwargs))
+    
+    # Construct observation sampler
+    if config.sampler_config.sampler == "uniform":
+        observation_sampler = UniformSampler(
+            env.horizon - 1,
+            config.sampler_config.sampler_kwargs.spacing,
+        )
+    else:
+        raise NotImplementedError
 
     if config.agent_config.update_rule == "monte_carlo":
         mc_policy_iteration(

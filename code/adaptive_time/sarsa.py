@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
-from code.q_functions import QFunction
+from adaptive_time.q_functions import QFunction
 
 
 def generate_transition(

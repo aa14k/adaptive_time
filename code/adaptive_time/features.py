@@ -1,4 +1,4 @@
-import tiles3 as tc
+import adaptive_time.tiles3 as tc
 import numpy as np
 
 
