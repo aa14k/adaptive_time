@@ -27,10 +27,10 @@ class Test(unittest.TestCase):
         for s in range(11):
             ret_vals = env.step(rng.choice([0, 2]))
             logger.info("returned values: %r", ret_vals)
-            reward, state, h, done = ret_vals
+            reward, state, h_and_h_disc, done = ret_vals
             rewards.append(reward)
             states.append(state)
-            hs.append(h)
+            hs.append(h_and_h_disc)
             dones.append(done)
 
         # The expected data.
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
                 [-0.53310198, -0.0064968],
             ]
         )
-        expected_hs = list(range(1, 12))
+        expected_hs = [(float(i+1), i) for i in range(11)]
         expected_dones = [False] * 9 + [True] * 2
 
         # Check correctness.
@@ -73,31 +73,31 @@ class Test(unittest.TestCase):
 
             for sub_second in range(5):
                 # Fine environment.
-                reward_fine, state_fine, h_fine, done_fine = env_fine.step(action)
+                reward_fine, state_fine, hs_fine, done_fine = env_fine.step(action)
                 logger.info(
                     "s=%r/%r;  FINE: %r, %r, %r, %r",
                     second,
                     sub_second,
                     reward_fine,
                     state_fine,
-                    h_fine,
+                    hs_fine,
                     done_fine,
                 )
 
             # Coarse environment.
-            reward_coarse, state_coarse, h_coarse, done_coarse = env_coarse.step(action)
+            reward_coarse, state_coarse, hs_coarse, done_coarse = env_coarse.step(action)
             logger.info(
                 "s=%r;  COARSE: %r, %r, %r, %r",
                 second,
                 reward_coarse,
                 state_coarse,
-                h_coarse,
+                hs_coarse,
                 done_coarse,
             )
 
             self.assertEqual(reward_coarse, reward_fine)
             self.assertTrue(np.allclose(state_coarse, state_fine, atol=0.0, rtol=0.01))
-            self.assertAlmostEqual(h_coarse, h_fine)
+            self.assertAlmostEqual(hs_coarse[0], hs_fine[0])
             self.assertEqual(done_coarse, done_fine)
 
     def test_create_trajectories(self):
