@@ -153,13 +153,13 @@ class MountainCarTileCodingQ(QFunction):
         average_updates = []
         action_frequencies = np.zeros(len(self.action_space))
 
-        for timestep in observe_times[::-1]:
+        for sample_i in range(len(observe_times) - 1, -1, -1):
             # Get action a_t, feature x_t and return G_t
-            curr_acts = disc_trajs["acts"][:, timestep]
+            curr_acts = disc_trajs["acts"][:, sample_i]
             curr_features = np.array(
-                [self.get_feature(obs) for obs in disc_trajs["obss"][:, timestep]]
+                [self.get_feature(obs) for obs in disc_trajs["obss"][:, sample_i]]
             )
-            curr_rets = rets[:, timestep]
+            curr_rets = rets[:, sample_i]
 
             # Compute Q-values
             q_vals = curr_features @ self.parameters
@@ -172,7 +172,7 @@ class MountainCarTileCodingQ(QFunction):
             acts_one_hot = np.eye(len(self.action_space))[curr_acts].reshape(
                 -1, len(self.action_space), 1
             )
-            include_timestep_mask = ep_mask[:, timestep].reshape((-1, 1, 1))
+            include_timestep_mask = ep_mask[:, sample_i].reshape((-1, 1, 1))
 
             per_sample_update = (
                 np.tile(
