@@ -13,7 +13,7 @@ class Sampler(ABC):
         pass
 
 
-class UniformSampler:
+class UniformSampler(Sampler):
     def __init__(self, num_steps: int, spacing: int):
         self.num_steps = num_steps
         self.spacing = spacing
@@ -22,7 +22,7 @@ class UniformSampler:
         return np.arange(0, self.num_steps, self.spacing)
 
 
-class QuadratureSampler:
+class QuadratureSampler(Sampler):
     def __init__(self, num_steps: int, tolerance: float):
         self.num_steps = num_steps
         self.tolerance = tolerance
