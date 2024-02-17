@@ -3,7 +3,7 @@
     "env_kwargs": {
         "horizon_sec": 200,
         "dt_sec": 1.0,
-        "es": 200
+        "es": 500
     },
     "seed": 42,
     "agent_config": {
@@ -23,7 +23,7 @@
         "sampler_kwargs": {
             "tolerance_init": 0.0005,
             "integral_rule": "trapezoid",
-            "update_when_best": false
+            "update_when_best": true
         }
     },
     "budget": 200000,

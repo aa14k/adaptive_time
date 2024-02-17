@@ -201,7 +201,7 @@ class MountainCarTileCodingQ(QFunction):
 
         return dict(
             mean_td_error=np.mean(td_error**2),
-            mean_q_vals=np.mean(q_vals, axis=(0, 1)),
+            mean_q_vals=np.mean(q_vals, axis=0),
             param_norms=np.linalg.norm(self.parameters, axis=0),
             update_norm=np.linalg.norm(np.mean(average_updates, axis=0), axis=0),
             returns=np.mean(rets[:, 0]),
