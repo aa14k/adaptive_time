@@ -208,6 +208,7 @@ class MountainCarTileCodingQ(QFunction):
             action_frequency=action_frequencies / np.sum(action_frequencies),
         )
 
+    # TODO: Think about what's actually going on with this version compared to per-timestep
     def batched_mc_update(
         self,
         disc_trajs: Any,
