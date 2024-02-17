@@ -9,19 +9,22 @@ class MountainCar(object):
         self.means = np.array([0, 1.0])
         self.reset()
 
-    def reset(self):
+    def reset(self, episode=9999999, es = 0):
         """Reset the environment to the initial state, return that state."""
-        # self.pos = np.random.uniform(low=-1.2,high=0.6)
-        # self.vel = np.random.uniform(low=-0.07,high=0.07)
-        self.pos = -0.5
-        self.vel = 0.0
+        if episode < es:
+            self.pos = np.random.uniform(low=-1.2,high=0.6)
+            self.vel = np.random.uniform(low=-0.07,high=0.07)
+        
+        else:
+            self.pos = -0.5
+            self.vel = 0.0
         self.done = False
         self.h = 0
         self.h_disc = -1
         return [self.pos, self.vel]
 
-    def step(self, action):
-        action = [-1, 0, 1][action]
+    def step(self, a):
+        action = a - 1
         self.h += self.dt_sec
         self.h_disc += 1
         self.vel = max(
