@@ -116,8 +116,11 @@ def sarsa(
             curr_observe_sample=curr_observe_sample,
             next_observe_sample=observed_time,
             max_time=env.horizon,
+            dt_sec=env.dt_sec,
         )
-        cur_ep_return += curr_tx["rew"] * (observed_time - curr_observe_sample)
+        cur_ep_return += (
+            curr_tx["rew"] * (observed_time - curr_observe_sample) * env.dt_sec
+        )
 
         curr_obs = next_tx["next_obs"]
         curr_observe_sample = observed_time
@@ -131,7 +134,7 @@ def sarsa(
             curr_obs = env.reset()
             observe_times = observation_sampler.sample_time()
 
-            cum_samples.append(sample_i+1)
+            cum_samples.append(sample_i + 1)
             ep_returns.append(cur_ep_return)
             cur_ep_return = 0
 

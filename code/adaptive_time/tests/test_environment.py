@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
                 [-0.53310198, -0.0064968],
             ]
         )
-        expected_hs = [(float(i+1), i) for i in range(11)]
+        expected_hs = [(float(i + 1), i) for i in range(11)]
         expected_dones = [False] * 9 + [True] * 2
 
         # Check correctness.
@@ -83,7 +83,9 @@ class Test(unittest.TestCase):
                 )
 
             # Coarse environment.
-            reward_coarse, state_coarse, hs_coarse, done_coarse = env_coarse.step(action)
+            reward_coarse, state_coarse, hs_coarse, done_coarse = env_coarse.step(
+                action
+            )
             logger.info(
                 "s=%r;  COARSE: %r, %r, %r, %r",
                 second,
@@ -94,7 +96,9 @@ class Test(unittest.TestCase):
             )
 
             self.assertEqual(reward_coarse, reward_fine)
-            self.assertTrue(np.allclose(state_coarse, state_fine, atol=0.000005, rtol=0.015))
+            self.assertTrue(
+                np.allclose(state_coarse, state_fine, atol=0.000005, rtol=0.015)
+            )
             self.assertAlmostEqual(hs_coarse[0], hs_fine[0])
             self.assertEqual(done_coarse, done_fine)
 

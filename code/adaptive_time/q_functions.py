@@ -22,13 +22,17 @@ class QFunction(ABC):
 
 
 def compute_disc_mc_return(
-    rewards: np.ndarray, observe_times: List[int], max_time: int
+    rewards: np.ndarray,
+    observe_times: List[int],
+    max_time: int,
+    dt_sec: float,
 ):
     """
     Compute the discretized Monte Carlo return
     - rewards (np.ndarray): A (N x H) matrix storing the H rewards per each of N episodes
     - observe_times (List[int]): The observe indices that resulted in the rewards
     - max_time (int): The maximum horizon length
+    - dt_sec (float): The most fine-grain delta time
     """
     (num_trajs, traj_len) = rewards.shape
     # Assumes that rewards have same length
@@ -37,7 +41,7 @@ def compute_disc_mc_return(
     for timestep_i in range(traj_len - 1, -1, -1):
         mc_returns[:, timestep_i] += (
             padded_time[timestep_i + 1] - padded_time[timestep_i]
-        ) * rewards[:, timestep_i] + mc_returns[:, timestep_i + 1]
+        ) * dt_sec * rewards[:, timestep_i] + mc_returns[:, timestep_i + 1]
     return mc_returns[:, :-1]
 
 
@@ -80,6 +84,8 @@ class MountainCarTileCodingQ(QFunction):
         curr_observe_sample: int,
         next_observe_sample: int,
         max_time: int,
+        dt_sec: float,
+        **kwargs,
     ):
         curr_feature = self.get_feature(curr_tx["curr_obs"])
         q_val = (curr_feature @ self.parameters)[curr_tx["act"]]
@@ -90,9 +96,9 @@ class MountainCarTileCodingQ(QFunction):
                 next_tx["act"]
             ]
 
-        target = (min(next_observe_sample, max_time) - curr_observe_sample) * curr_tx[
-            "rew"
-        ] + next_q_val
+        target = (
+            min(next_observe_sample, max_time) - curr_observe_sample
+        ) * dt_sec * curr_tx["rew"] + next_q_val
         td_error = target - q_val
         update = td_error * curr_feature
 
@@ -118,7 +124,8 @@ class MountainCarTileCodingQ(QFunction):
         ep_horizons: Any,
         observe_times: Any,
         max_time: Any,
-        **kwargs
+        dt_sec: float,
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Get dict of ndarrays, which results in:
@@ -133,8 +140,16 @@ class MountainCarTileCodingQ(QFunction):
             k: np.array([traj[k] for traj in disc_trajs]) for k in disc_trajs[0]
         }
 
+        print(ep_horizons)
+        if ep_horizons[0] < 199:
+            import ipdb
+
+            ipdb.set_trace()
+
         # Compute Monte Carlo return
-        rets = compute_disc_mc_return(disc_trajs["rews"], observe_times, max_time - 1)
+        rets = compute_disc_mc_return(
+            disc_trajs["rews"], observe_times, max_time - 1, dt_sec
+        )
 
         # Get tile-coding features
         features = np.array(
@@ -151,7 +166,7 @@ class MountainCarTileCodingQ(QFunction):
         # import ipdb
         # ipdb.set_trace()
 
-        print(rets, len(rets[0]))
+        # print(rets, len(rets[0]))
         td_error = rets[..., None] - q_vals_act
         acts_one_hot = np.eye(len(self.action_space))[disc_trajs["acts"]].reshape(
             -1, len(self.action_space), 1
@@ -200,9 +215,9 @@ class MountainCarTileCodingQ(QFunction):
         q_vals = feature @ self.parameters
         return argmax(q_vals)
 
-    def sample_action(self, obs: Any, temperature: float=1, **kwargs):
+    def sample_action(self, obs: Any, temperature: float = 1, **kwargs):
         feature = self.get_feature(obs)
         q_vals = feature @ self.parameters
-        print("Temp: {}".format(temperature))
+        # print("Temp: {}".format(temperature))
         probs = softmax(q_vals / temperature)
         return np.random.choice(len(self.action_space), p=probs)

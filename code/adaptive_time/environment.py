@@ -2,19 +2,23 @@ import numpy as np
 
 
 class MountainCar(object):
-    def __init__(self, horizon_sec=200.0, dt_sec=1.0):
+    def __init__(self, horizon_sec=200.0, dt_sec=1.0, es: int = 50):
         self.horizon_sec = horizon_sec
         self.dt_sec = dt_sec
+        self.es = es
         self.horizon = int(horizon_sec / dt_sec)
         self.means = np.array([0, 1.0])
         self.reset()
 
-    def reset(self, episode=9999999, es = 0):
+    def reset(self, episode_i: int = 50):
         """Reset the environment to the initial state, return that state."""
-        if episode < es:
-            self.pos = np.random.uniform(low=-1.2,high=0.6)
-            self.vel = np.random.uniform(low=-0.07,high=0.07)
-        
+        # self.pos = np.random.uniform(low=-1.2,high=0.6)
+        # self.pos = np.random.uniform(low=-1.2,high=0.3)
+        # self.vel = np.random.uniform(low=-0.07,high=0.07)
+        if episode_i < self.es:
+            print("ES")
+            self.pos = np.random.uniform(low=-1.2, high=0.6)
+            self.vel = np.random.uniform(low=-0.07, high=0.07)
         else:
             self.pos = -0.5
             self.vel = 0.0

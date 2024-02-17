@@ -8,7 +8,11 @@ from adaptive_time.q_functions import QFunction
 
 
 def generate_traj(
-    env: Any, q_function: Any, max_horizon: int = None, action_repeat: int = 5, global_step: int = 1,
+    env: Any,
+    q_function: Any,
+    max_horizon: int = None,
+    action_repeat: int = 1,
+    episode_i: int = 50,
 ) -> Tuple[Dict[str, Any], int]:
     """
     Generate a trajectory from the environment using the most fine-grain timescale
@@ -18,21 +22,21 @@ def generate_traj(
     - action_repeat (int): repeat action N times
 
     """
-    curr_obs = env.reset()
+    curr_obs = env.reset(episode_i)
     done = False
     obss = [curr_obs]
     acts = []
     rews = []
     horizon = 0
     while not done:
-        curr_act = q_function.sample_action(curr_obs, temperature=10000/global_step)
-        # curr_act = q_function.greedy_action(curr_obs)
-        global_step += 1
+        curr_act = q_function.greedy_action(curr_obs)
         for _ in range(action_repeat + 1):
             reward, curr_obs, (_, horizon), done = env.step(curr_act)
             obss.append(curr_obs)
+            print(curr_obs)
             acts.append(curr_act)
             rews.append(reward)
+            print(horizon, done, reward)
             if done:
                 break
 
@@ -95,7 +99,12 @@ def mc_policy_iteration(
         ep_horizons = []
         while traj_i < num_trajs_per_update:
             # Observe "continuous-time" trajectory
-            cont_traj, horizon = generate_traj(env, q_function, env.horizon, global_step=max(1, sample_i))
+            cont_traj, horizon = generate_traj(
+                env,
+                q_function,
+                env.horizon,
+                episode_i=iter_i * num_trajs_per_update + traj_i,
+            )
             cont_trajs.append(cont_traj)
 
             # Discretize trajectory
@@ -117,6 +126,7 @@ def mc_policy_iteration(
             ep_horizons=ep_horizons,
             observe_times=observe_times,
             max_time=env.horizon,
+            dt=env.dt_sec,
         )
 
         if iter_i % config.log_frequency == 0:
