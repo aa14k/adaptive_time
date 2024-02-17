@@ -60,9 +60,8 @@ class AdaptiveQuadratureSampler(Sampler):
         left_seg = self.integral_rule(rews[t_start:t_mid])
         right_seg = self.integral_rule(rews[t_mid:t_end])
 
-        sample_times = [t_mid]
         if np.abs(curr_seg - left_seg - right_seg) < tolerance:
-            return (sample_times, left_seg + right_seg, 1)
+            return ([], curr_seg, 1)
 
         next_tolerance = 0.5 * tolerance
         left_sample_times, left_seg, left_calls = self._adapt(
@@ -72,6 +71,7 @@ class AdaptiveQuadratureSampler(Sampler):
             rews, t_mid, t_end, right_seg, next_tolerance
         )
 
+        sample_times = [t_mid]
         sample_times.extend(left_sample_times)
         sample_times.extend(right_sample_times)
         sample_times = np.unique(sample_times)
@@ -82,9 +82,9 @@ class AdaptiveQuadratureSampler(Sampler):
         rews = np.mean([traj["rews"] for traj in trajs], axis=0)
         curr_seg = self.integral_rule(rews)
         sample_times, total_seg, num_calls = self._adapt(
-            rews, 0, self.num_steps, curr_seg, self.tolerance_init
+            rews, 0, self.num_steps + 1, curr_seg, self.tolerance_init
         )
-        self._sample_times = np.concatenate(([0], sample_times))
+        self._sample_times = np.concatenate(([0], sample_times)).astype(int)
         return sample_times, total_seg, num_calls
 
     def sample_time(self):
