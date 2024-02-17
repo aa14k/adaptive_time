@@ -19,7 +19,9 @@ def generate_traj(
     - env (Any): An environment that somewhat follows Gym API
     - q_function (Any): The Q-function to learn from
     - max_horizon (int): Maximum horizon of the environment
-    - action_repeat (int): repeat action N times
+    - use_action_repeat (bool): Whether to use action repeat, or get a chance to
+        re-sample the action at each time step.
+    - episode_i (int): The current episode number, used for environment reset
 
     """
     curr_obs = env.reset(episode_i)
@@ -33,10 +35,8 @@ def generate_traj(
         for _ in range(action_repeat + 1):
             reward, curr_obs, (_, horizon), done = env.step(curr_act)
             obss.append(curr_obs)
-            print(curr_obs)
             acts.append(curr_act)
             rews.append(reward)
-            print(horizon, done, reward)
             if done:
                 break
 

@@ -140,7 +140,96 @@ class MountainCarTileCodingQ(QFunction):
             k: np.array([traj[k] for traj in disc_trajs]) for k in disc_trajs[0]
         }
 
-        print(ep_horizons)
+        # Compute Monte Carlo return
+        rets = compute_disc_mc_return(
+            disc_trajs["rews"], observe_times, max_time - 1, dt_sec
+        )
+
+        # Construct mask to remove finished timesteps
+        ep_mask = (1 - np.eye(max_time + 1)[np.array(ep_horizons) + 1])[..., :-1]
+
+        average_updates = []
+        action_frequencies = np.zeros(len(self.action_space))
+
+        for timestep in observe_times[::-1]:
+            # Get action a_t, feature x_t and return G_t
+            curr_acts = disc_trajs["acts"][:, timestep]
+            curr_features = np.array(
+                [self.get_feature(obs) for obs in disc_trajs["obss"][:, timestep]]
+            )
+            curr_rets = rets[:, timestep]
+
+            # Compute Q-values
+            q_vals = curr_features @ self.parameters
+            q_vals_act = np.take_along_axis(q_vals, curr_acts[..., None], axis=-1)
+
+            # Compute TD error
+            td_error = curr_rets[..., None] - q_vals_act
+
+            # Perform update only to paraemters with actions taken, and with unfinished episodes
+            acts_one_hot = np.eye(len(self.action_space))[curr_acts].reshape(
+                -1, len(self.action_space), 1
+            )
+            include_timestep_mask = ep_mask[:, timestep]
+
+            per_sample_update = (
+                np.tile(
+                    (td_error * curr_features).reshape(-1, 1, self.num_parameters),
+                    reps=(1, len(self.action_space), 1),
+                )
+                * acts_one_hot
+                * include_timestep_mask
+            )
+
+            # Take average across episode---deal with actions that are not taken
+            average_update = (
+                np.sum(per_sample_update, axis=0)
+                / np.sum(acts_one_hot * include_timestep_mask, axis=0)
+            ).T
+            average_update[np.where(1 - np.isfinite(average_update))] = 0
+
+            self.parameters = (
+                self.parameters + self.agent_config.learning_rate * average_update
+            )
+            # print(average_update[np.where(curr_features != 0)[-1]][:, curr_acts], curr_acts, np.where(curr_features != 0)[-1])
+
+            average_updates.append(average_update)
+            action_frequencies += np.sum(
+                acts_one_hot * include_timestep_mask, axis=0
+            ).flatten()
+
+        return dict(
+            mean_td_error=np.mean(td_error**2),
+            mean_q_vals=np.mean(q_vals, axis=(0, 1)),
+            param_norms=np.linalg.norm(self.parameters, axis=0),
+            update_norm=np.linalg.norm(np.mean(average_updates, axis=0), axis=0),
+            returns=np.mean(rets[:, 0]),
+            action_frequency=action_frequencies / np.sum(action_frequencies),
+        )
+
+    def batched_mc_update(
+        self,
+        disc_trajs: Any,
+        ep_horizons: Any,
+        observe_times: Any,
+        max_time: Any,
+        dt_sec: float,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """
+        Get dict of ndarrays, which results in:
+        {
+            "obss": ndarray,
+            "acts": ndarray,
+            "rews": ndarray,
+        }
+        We assume that the arrays are padded such that the horizon is consistent.
+        """
+        disc_trajs = {
+            k: np.array([traj[k] for traj in disc_trajs]) for k in disc_trajs[0]
+        }
+
+        # print(ep_horizons)
         if ep_horizons[0] < 199:
             import ipdb
 
@@ -218,6 +307,5 @@ class MountainCarTileCodingQ(QFunction):
     def sample_action(self, obs: Any, temperature: float = 1, **kwargs):
         feature = self.get_feature(obs)
         q_vals = feature @ self.parameters
-        # print("Temp: {}".format(temperature))
         probs = softmax(q_vals / temperature)
         return np.random.choice(len(self.action_space), p=probs)

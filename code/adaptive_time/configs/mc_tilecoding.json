@@ -3,7 +3,7 @@
     "env_kwargs": {
         "horizon_sec": 200,
         "dt_sec": 1.0,
-        "es": 100
+        "es": 50
     },
     "seed": 42,
     "agent_config": {
@@ -12,9 +12,9 @@
         "param_init_mean": 10,
         "param_init_std": 0.0,
         "iht_size": 4096,
-        "num_tiles": 10,
-        "num_tilings": 10,
-        "learning_rate": 1e-3,
+        "num_tiles": 8,
+        "num_tilings": 8,
+        "learning_rate": 0.0625,
         "action_space": [-1, 0, 1],
         "seed": 43
     },
@@ -24,7 +24,7 @@
             "spacing": 1
         }
     },
-    "budget": 400,
+    "budget": 40000,
     "num_trajs_per_update": 1,
     "log_frequency": 1
 }
