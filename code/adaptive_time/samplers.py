@@ -23,8 +23,9 @@ class UniformSampler:
 
 
 class QuadratureSampler:
-    def __init__(self, num_steps: int):
+    def __init__(self, num_steps: int, tolerance: float):
         self.num_steps = num_steps
+        self.tolerance = tolerance
         self._sample_times = [0, 1]
 
     def adapt(self, traj: Any):
