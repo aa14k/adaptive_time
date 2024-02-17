@@ -126,7 +126,7 @@ def mc_policy_iteration(
             ep_horizons=ep_horizons,
             observe_times=observe_times,
             max_time=env.horizon,
-            dt=env.dt_sec,
+            dt_sec=env.dt_sec,
         )
 
         if iter_i % config.log_frequency == 0:
