@@ -1,7 +1,9 @@
 {
     "env": "mountain_car",
     "env_kwargs": {
-        "horizon_sec": 200
+        "horizon_sec": 200,
+        "dt_sec": 1.0,
+        "es": 100
     },
     "seed": 42,
     "agent_config": {
@@ -22,7 +24,7 @@
             "spacing": 1
         }
     },
-    "budget": 2000000,
-    "num_trajs_per_update": 10,
+    "budget": 400,
+    "num_trajs_per_update": 1,
     "log_frequency": 1
 }

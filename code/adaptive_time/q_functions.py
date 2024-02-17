@@ -133,6 +133,11 @@ class MountainCarTileCodingQ(QFunction):
             k: np.array([traj[k] for traj in disc_trajs]) for k in disc_trajs[0]
         }
 
+        print(ep_horizons)
+        if ep_horizons[0] < 199:
+            import ipdb
+            ipdb.set_trace()
+
         # Compute Monte Carlo return
         rets = compute_disc_mc_return(disc_trajs["rews"], observe_times, max_time - 1)
 
@@ -151,7 +156,7 @@ class MountainCarTileCodingQ(QFunction):
         # import ipdb
         # ipdb.set_trace()
 
-        print(rets, len(rets[0]))
+        # print(rets, len(rets[0]))
         td_error = rets[..., None] - q_vals_act
         acts_one_hot = np.eye(len(self.action_space))[disc_trajs["acts"]].reshape(
             -1, len(self.action_space), 1
@@ -203,6 +208,6 @@ class MountainCarTileCodingQ(QFunction):
     def sample_action(self, obs: Any, temperature: float=1, **kwargs):
         feature = self.get_feature(obs)
         q_vals = feature @ self.parameters
-        print("Temp: {}".format(temperature))
+        # print("Temp: {}".format(temperature))
         probs = softmax(q_vals / temperature)
         return np.random.choice(len(self.action_space), p=probs)
