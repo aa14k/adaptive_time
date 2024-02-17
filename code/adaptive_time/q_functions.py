@@ -172,7 +172,7 @@ class MountainCarTileCodingQ(QFunction):
             acts_one_hot = np.eye(len(self.action_space))[curr_acts].reshape(
                 -1, len(self.action_space), 1
             )
-            include_timestep_mask = ep_mask[:, timestep]
+            include_timestep_mask = ep_mask[:, timestep].reshape((-1, 1, 1))
 
             per_sample_update = (
                 np.tile(
