@@ -94,7 +94,7 @@ class AdaptiveQuadratureSampler(Sampler):
                 self._sample_times = np.concatenate(([0], sample_times)).astype(int)
                 self.best_rew = total_reward
             else:
-                self._sample_times = np.random.permutation(self.num_steps)[:20]
+                self._sample_times = np.sort(np.random.permutation(self.num_steps)[:20])
         else:
             self._sample_times = np.concatenate(([0], sample_times)).astype(int)
         return sample_times, total_seg, num_calls

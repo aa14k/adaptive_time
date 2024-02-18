@@ -118,6 +118,8 @@ class MountainCarTileCodingQ(QFunction):
             next_tx=next_tx,
             param_norms=np.linalg.norm(self.parameters, axis=0),
             update_norm=np.linalg.norm(update),
+            curr_observe_sample=curr_observe_sample,
+            next_observe_sample=next_observe_sample,
         )
 
     def mc_update(
@@ -206,6 +208,7 @@ class MountainCarTileCodingQ(QFunction):
             update_norm=np.linalg.norm(np.mean(average_updates, axis=0), axis=0),
             returns=np.mean(rets[:, 0]),
             action_frequency=action_frequencies / np.sum(action_frequencies),
+            observe_times=observe_times,
         )
 
     # TODO: Think about what's actually going on with this version compared to per-timestep
