@@ -63,8 +63,9 @@ class AdaptiveQuadratureSampler(Sampler):
         left_seg = self.integral_rule(rews[t_start:t_mid])
         right_seg = self.integral_rule(rews[t_mid:t_end])
 
-        if np.abs(curr_seg - left_seg - right_seg) < tolerance:
-            return ([], curr_seg, 1)
+        total_seg = left_seg + right_seg
+        if np.abs(curr_seg - total_seg) < tolerance:
+            return ([t_mid], total_seg, 1)
 
         next_tolerance = 0.5 * tolerance
         left_sample_times, left_seg, left_calls = self._adapt(
