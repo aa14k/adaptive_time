@@ -1,5 +1,6 @@
 import adaptive_time.tiles3 as tc
 import numpy as np
+import itertools as iters
 
 
 class MountainCarTileCoder:
@@ -63,3 +64,33 @@ class MountainCarTileCoder:
         )
 
         return np.array(tiles)
+    
+
+
+class Fourier_Features(object):
+    def __init__(self):
+        pass
+    
+    
+    def init_state_normalizers(self,maxs,mins):
+        self.max = maxs
+        self.min = mins
+        self.range = (self.max - self.min)
+        
+    
+    def normalize_state(self,state):
+        return state - self.min / self.range
+    
+    def init_fourier_features(self, state_dim, order):
+        self.order_list = np.array(list(iters.product(np.arange(order+1), repeat=state_dim)))
+
+
+    def get_fourier_feature(self, state):
+        state = self.normalize_state(state)
+        order_list = self.order_list
+        state_new = np.array(state).reshape(1,-1)
+        scalars = np.einsum('ij, kj->ik', order_list, state_new) #do a row by row dot product with the state. i = length of order list, j = state dimensions, k = 1
+        assert scalars.shape == (len(order_list),1)
+        phi = np.cos(np.pi*scalars)
+        return phi.flatten()
+    
