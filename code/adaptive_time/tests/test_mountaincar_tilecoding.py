@@ -3,7 +3,7 @@ import logging
 import random
 import numpy as np
 
-from adaptive_time.q_functions import MountainCarTileCodingQ
+from adaptive_time.q_functions import Q
 from adaptive_time.utils import parse_dict
 
 
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
             "action_space": [-1, 0, 1],
             "seed": 43,
         }
-        q_function = MountainCarTileCodingQ(parse_dict(q_config))
+        q_function = Q(parse_dict(q_config))
         q_function.parameters = np.ones(q_function.parameters.shape)
 
         obss = np.arange(10).reshape((5, 2)) * 0.005
