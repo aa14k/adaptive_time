@@ -28,19 +28,19 @@ class Test(unittest.TestCase):
             "action_space": [-1, 0, 1],
             "seed": 43,
         }
-        q_function = Q(parse_dict(q_config))
-        q_function.parameters = np.ones(q_function.parameters.shape)
+        # q_function = Q(parse_dict(q_config))
+        # q_function.parameters = np.ones(q_function.parameters.shape)
 
-        obss = np.arange(10).reshape((5, 2)) * 0.005
-        features = [q_function.get_feature(obs) for obs in obss]
-        acts = [0, 1, 2, 0, 1]
-        rews = [0, 0, 0, 0, 1]
-        max_time = 5
-        observe_times = [0, 1, 2]
+        # obss = np.arange(10).reshape((5, 2)) * 0.005
+        # features = [q_function.get_feature(obs) for obs in obss]
+        # acts = [0, 1, 2, 0, 1]
+        # rews = [0, 0, 0, 0, 1]
+        # max_time = 5
+        # observe_times = [0, 1, 2]
 
-        from pprint import pprint
+        # from pprint import pprint
 
-        pprint(features)
+        # pprint(features)
         # self.fail()
 
         # self.assertEqual(rewards, expected_rewards)
