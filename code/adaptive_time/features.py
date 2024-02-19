@@ -1,9 +1,24 @@
+from abc import ABC, abstractmethod
+from typing import Any, List, Dict
+
+
 import adaptive_time.tiles3 as tc
 import numpy as np
 import itertools as iters
 
 
-class MountainCarTileCoder:
+class Extractor(ABC):
+    @abstractmethod
+    def get_features(self, obs: Any) -> np.ndarray:
+        pass
+
+    @property
+    @abstractmethod
+    def num_parameters(self) -> int:
+        pass
+
+
+class MountainCarTileCoder(Extractor):
     def __init__(self, iht_size=4096, num_tilings=8, num_tiles=8):
         """
         Initializes the MountainCar Tile Coder
@@ -65,9 +80,19 @@ class MountainCarTileCoder:
 
         return np.array(tiles)
     
+    def get_features(self, obs: Any) -> np.ndarray:
+        active_tiles = self.get_tiles(*obs)
+        feature = np.zeros(self.iht.size)
+        feature[active_tiles] = 1
+        return feature
+
+    @property
+    def num_parameters(self) -> int:
+        return self.iht.size
 
 
 class Fourier_Features(object):
+    # TODO: Implement this as an `Extractor`
     def __init__(self):
         pass
     
@@ -76,14 +101,13 @@ class Fourier_Features(object):
         self.max = maxs
         self.min = mins
         self.range = (self.max - self.min)
-        
     
     def normalize_state(self,state):
+        return (state - self.min) / self.range
         return (state - self.min) / self.range
     
     def init_fourier_features(self, state_dim, order):
         self.order_list = np.array(list(iters.product(np.arange(order+1), repeat=state_dim)))
-
 
     def get_fourier_feature(self, state):
         state = self.normalize_state(state)
@@ -93,4 +117,24 @@ class Fourier_Features(object):
         assert scalars.shape == (len(order_list),1)
         phi = np.cos(np.pi*scalars)
         return phi.flatten()
+
+
+class Tabular(Extractor):
+    """A simple vector feature extractor for tabular MDPs.
     
+    The feature vector is a one-hot encoding of the state space. States
+    are assumed to be integers from 0 to num_states-1.
+    """
+
+    def __init__(self, num_states: int):
+        self._num_states = num_states
+
+    def get_features(self, obs: Any) -> np.ndarray:
+        feature = np.zeros(self._num_states)
+        feature[obs] = 1
+        return feature
+
+    @property
+    @abstractmethod
+    def num_parameters(self) -> int:
+        return self._num_states
