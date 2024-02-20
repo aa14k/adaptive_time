@@ -3,6 +3,7 @@ import numpy as np
 
 class MountainCar(object):
     def __init__(self, horizon_sec=200.0, dt_sec=1.0, es: int = 50):
+        print('Mountain Car')
         self.horizon_sec = horizon_sec
         self.dt_sec = dt_sec
         self.es = es
@@ -16,7 +17,7 @@ class MountainCar(object):
         # self.pos = np.random.uniform(low=-1.2,high=0.3)
         # self.vel = np.random.uniform(low=-0.07,high=0.07)
         if episode_i < self.es:
-            self.pos = np.random.uniform(low=-1.2, high=0.6)
+            self.pos = np.random.uniform(low=-1.1, high=0.5)
             self.vel = np.random.uniform(low=-0.07, high=0.07)
         else:
             self.pos = -0.5
@@ -44,11 +45,11 @@ class MountainCar(object):
         if self.pos >= 0.6:
             # At goal; stay there.
             self.pos = 0.6
-            reward = 0.0
+            reward = 1.0
         else:
             # Not at goal; move.
             self.pos = max(self.pos + self.dt_sec * self.vel, -1.2)
-            reward = -1.0
+            reward = 0.0
 
         if self.h + self.dt_sec > self.horizon_sec:
             self.done = True
