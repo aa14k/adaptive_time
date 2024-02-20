@@ -96,7 +96,6 @@ class Fourier_Features(object):
     def __init__(self):
         pass
     
-    
     def init_state_normalizers(self, maxs, mins):
         self.max = maxs
         self.min = mins
@@ -117,6 +116,10 @@ class Fourier_Features(object):
         assert scalars.shape == (len(order_list),1)
         phi = np.cos(np.pi*scalars)
         return phi.flatten()
+    
+    @property
+    def num_parameters(self):
+        return len(self.order_list)
 
 
 class Tabular(Extractor):
