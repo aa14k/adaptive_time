@@ -4,7 +4,7 @@ import argparse
 import json
 import numpy as np
 
-from adaptive_time.environment import MountainCar, Corridor
+from adaptive_time.environments import MountainCar, Corridor
 from adaptive_time.monte_carlo import mc_policy_iteration
 from adaptive_time.samplers import UniformSampler, AdaptiveQuadratureSampler
 from adaptive_time.sarsa import sarsa
