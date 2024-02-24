@@ -1,0 +1,252 @@
+% RLC main.tex Version 2024.3
+
+\documentclass[10pt]{article} % For LaTeX2e
+\usepackage{rlc}
+% If accepted, instead use the following line for the camera-ready submission:
+%\usepackage[accepted]{rlc}
+% To de-anonymize and remove mentions to RLC (for example, for posting to preprint servers), instead use the following:
+% \usepackage[preprint]{rlc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Recommended (but not required) packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}            % Defines common symbols like \mathbb R
+\usepackage{mathtools}          % Extends amsmath, providing common math tools
+\usepackage{mathrsfs}           % Enables \mathscr, which can work in cases that \mathcal does not
+\mathtoolsset{showonlyrefs}     % Only number equations that are referenced (optional)
+\usepackage{graphicx}           % For including images
+\usepackage{subcaption}         % Allows for the use of subfigures and subcaptions
+\usepackage[space]{grffile}     % For spaces in image names
+\usepackage{url}                % For displaying urls
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Title Page Specification
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Formatting Instructions for RLC Submissions}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the tmlr package is used without the [accepted] or [preprint] options.
+% Non-anonymous submissions will be rejected without review.
+
+\author{Philip S. Thomas  \\
+    pthomas@cs.umass.edu \\
+    College of Information and Computer Sciences\\
+    University of Massachusetts
+    \And
+    Glen Berseth \\
+    glen.berseth@mila.quebec\\
+    Mila, Universit\'e de Montr\'eal \\
+    CIFAR Canada AI Chair}
+
+% The \author macro works with any number of authors. Use \AND 
+% to separate the names and addresses of multiple authors.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Begin document, create title and abstract
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The abstract paragraph should be indented 1/2~inch on both left and right-hand margins. Use 10~point type, with a vertical spacing of 11~points. The word \textbf{\large Abstract} must be centered, in bold, and in point size 12. Two line spaces precede the abstract. The abstract must be limited to one paragraph.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Section: Submission of papers to RLC
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Submission of papers to RLC}
+\label{sec:submission}
+
+RLC requires electronic submissions, processed by \url{https://openreview.net/}. See RLC's website for more instructions.
+
+If your paper is ultimately accepted, use option {\tt accepted} with the {\tt rlc} package to adjust the format to the camera ready requirements, as follows:
+\begin{center}  
+    {\tt {\textbackslash}usepackage[accepted]\{rlc\}}. 
+\end{center}
+To de-anonymize and remove mentions to RLC (for example for posting to preprint servers), use the preprint option, as in {\tt {\textbackslash}usepackage[preprint]\{rlc\}}. 
+
+\subsection{Style}
+Papers to be submitted to RLC must be prepared according to the instructions presented here.
+
+Authors are required to use the RLC \LaTeX{} style files obtainable at the RLC website (as both a .zip file and a link to an Overleaf project). 
+%Please make sure you use the current files and not previous versions. 
+Changing the style files, font, font size, margins, line spacing, or appearance of sections and subsections may be grounds for rejection.
+
+\subsection{Retrieval of style files}
+
+The style files for RLC are available online on the RLC website. The file \verb+rlc.pdf+ contains these instructions and illustrates the various formatting requirements your RLC paper must satisfy. Submissions must be made using \LaTeX{} and the style files \verb+rlc.sty+ and \verb+rlc.bst+ (to be used with \LaTeX{}2e). The file \verb+rlc.tex+ may be used as a ``shell'' for writing your paper. All you have to do is replace the author, title, abstract, and text of the paper with your own.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Section: Citations, figures, tables, references, equations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Citations, figures, tables, references, equations}
+\label{sec:others}
+
+These instructions apply to everyone, regardless of the formatter being used.
+
+\subsection{Citations within the text}
+\label{sec:citations}
+Citations within the text should be based on the \texttt{natbib} package and include the authors' last names and year (with the ``et~al.'' construct for more than two authors). When the authors or the publication are included in the sentence, the citation should not be in parenthesis, using \verb|\citet{}| (as in ``See the work of \citet{sutton1998introduction} for more information.''). Otherwise, the citation should be in parenthesis using \verb|\citep{}| (as in ``Reinforcement learning is defined not by characterizing learning methods, but by characterizing a learning \textit{problem} \citep{sutton1998introduction}.'').
+
+The corresponding references are to be listed in alphabetical order of authors, in the \textbf{References} section. As to the format of the references themselves, any style is acceptable as long as it is used consistently.
+
+\subsection{Footnotes}
+\label{sec:footnotes}
+Indicate footnotes with a number\footnote{This is an example of a footnote.} in the text. Place the footnotes at the bottom of the page on which they appear. Precede the footnote with a horizontal rule of 2~inches. When following punctuation, footnotes should be placed after the punctuation (e.g., commas and periods).\footnote{This is a second example of a footnote.}
+
+\subsection{Figures}
+\label{sec:figures}
+All artwork must be neat, clean, and legible when printed. Lines should be dark enough for purposes of reproduction. The figure number and caption always appear after the figure. Place one line space before the figure caption, and one line space after the figure. The figure caption is lowercase (except for the first word and proper nouns); figures are numbered consecutively.
+
+Make sure the figure caption does not get separated from the figure. Leave sufficient space to avoid splitting the figure and figure caption. Ensure that figures are always referenced in the text before they appear, or on the same page that they appear. This will be ensured if the figure occurs after its first reference in the source. For example, see Figure \ref{fig:example}.
+
+% This figure is after it was first referenced, and so latex will ensure it appears on the same page that it is referenced or after.
+\begin{figure}[ht]
+    \begin{center}
+        \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+    \end{center}
+    \caption{Sample figure caption.}
+    \label{fig:example}
+\end{figure}
+
+You may use color figures. However, it is best for the figure captions and the paper body to make sense if the paper is printed either in black/white or in color.
+
+You may use subfigures, as shown in Figure \ref{fig:subfigureExample}.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        %\includegraphics[width=\textwidth]{image1}
+        \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}} % Replace this line with the line above, where image1 is your image.
+        \caption{First subfigure}
+        \label{fig:sub1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        %\includegraphics[width=\textwidth]{image2}
+        \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}} % Replace this line with the line above, where image2 is your image.
+        \caption{Second subfigure}
+        \label{fig:sub2}
+    \end{subfigure}
+    \caption{An example using subfigures.}
+    \label{fig:subfigureExample}
+\end{figure}
+
+\subsection{Tables}
+\label{sec:tables}
+Tables must be centred, neat, clean and legible. Do not use hand-drawn tables. The table number and title always appear after the table. See Table~\ref{tab:exampleTable}. Place one line space before the table title, one line space after the table title, and one line space after the table. Tables are numbered consecutively.
+
+\begin{table}[htbp]
+    \begin{center}
+        \begin{tabular}{ll}
+            \multicolumn{1}{l}{\bf PART}  &\multicolumn{1}{l}{\bf DESCRIPTION}
+            \\ \hline \\
+            Actor         &Stores and updates the policy \\
+            Critic        &Stores and updates a value function \\
+        \end{tabular}
+    \end{center}
+    \caption{Sample table caption}
+    \label{tab:exampleTable}
+\end{table}
+
+\subsection{Equations}
+\label{sec:equations}
+Equations can be included inline or using \texttt{equation}, \texttt{gather}, or \texttt{align} blocks. When using \texttt{align} blocks, place the alignment character {\tt\&} after equality or inequality symbols so that it is visually clear where each expression (which may span more than one line) begins and ends, as in the following example. 
+\begin{align}
+    \label{eq:secondActionPr}
+    \Pr(A_2=a_2) =& \sum_{s_0 \in \mathcal S} \Pr(S_0=s_0) \sum_{a_0 \in \mathcal A} \Pr(A_0=a_0|S_0=s_0) \sum_{s_1 \in \mathcal S} \Pr(S_1=s_1|S_0=s_0,A_0=a_0)\\
+    &\times \!\!\! \sum_{a_1 \in \mathcal A} \Pr(A_1=a_1|S_1=s_1)\sum_{s_2 \in \mathcal S}\Pr(S_2=s_2|S_1=s_1,A_1=a_1)\Pr(A_2=a_2|S_2=s_2)\\
+    %
+    =&\sum_{s_0 \in \mathcal S} d_0(s_0) \sum_{a_0 \in \mathcal A} \pi(s_0,a_0)\sum_{s_1 \in \mathcal S} p(s_0,a_0,s_1) \sum_{a_1 \in \mathcal A} \pi(s_1,a_1) \sum_{s_2 \in \mathcal S}p(s_1,a_1,s_2)\pi(s_2,a_2),
+\end{align}
+where $\times$ denotes scalar multiplication split across multiple lines. 
+
+You may use the style of your choice when referencing expressions by number, including the following forms: 
+\begin{itemize}
+    \item In \eqref{eq:secondActionPr}, there is no summation over $a_2$ because it is defined on the left side of the equation.\footnote{This format is sometimes preferred because often referenced expressions are inequalities or definitions, not equations. Notice the use of \texttt{eqref} in place of \texttt{ref} in this example.}
+    \item In Equation~\ref{eq:secondActionPr}, there is no summation over $a_2$ because it is defined on the left side of the equation.
+    \item In Eq.~\ref{eq:secondActionPr}, there is no summation over $a_2$ because it is defined on the left side of the equation.
+\end{itemize}
+You may number all equations or only the equations that are referenced (the default behavior is the latter).\footnote{To number all equations, comment out the line in main.tex: \texttt{\textbackslash mathtoolsset\{showonlyrefs\}}.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Section: Final instructions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Final instructions}
+\label{sec:final}
+Do not change any aspects of the formatting parameters in the style files. In particular, do not modify the width or length of the rectangle the text should fit into, and do not change font sizes (except perhaps in the \textbf{References} section; see below). Please note that pages should be numbered.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Section: Preparing files
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Preparing PostScript or PDF files}
+\label{sec:prep}
+We recommend preparing your manuscript using the provided Overleaf project, which will automatically construct a PDF file for submission. This file can be downloaded by clicking the ``Menu'' button in the top left, and then selecting ``PDF'' at the top of the menu that appears.
+
+If you are not using Overleaf, please prepare PostScript or PDF files with paper size ``US Letter'', and not, for example, ``A4''. The -t letter option on dvips will produce US Letter files.
+
+Consider directly generating PDF files using \verb+pdflatex+ (especially if you are a MiKTeX user). PDF figures must be substituted for EPS figures, however.
+
+Otherwise, please generate your PostScript and PDF files with the following commands:
+\begin{verbatim}
+dvips mypaper.dvi -t letter -Ppdf -G0 -o mypaper.ps
+ps2pdf mypaper.ps mypaper.pdf
+\end{verbatim}
+
+\subsection{Margins in LaTeX}
+\label{sec:margins}
+Most of the margin problems come from figures positioned by hand using \verb+\special+ or other commands. We suggest using the command \verb+\includegraphics+ from the graphicx package. Always specify the figure width as a multiple of the line width as in the example below using .eps graphics
+\begin{verbatim}
+   \usepackage[dvips]{graphicx} ...
+   \includegraphics[width=0.8\linewidth]{myfile.eps}
+\end{verbatim}
+or % Apr 2009 addition
+\begin{verbatim}
+   \usepackage[pdftex]{graphicx} ...
+   \includegraphics[width=0.8\linewidth]{myfile.pdf}
+\end{verbatim}
+for .pdf graphics. See Section~4.4 in the graphics bundle documentation (\url{http://www.ctan.org/tex-archive/macros/latex/required/graphics/grfguide.ps})
+
+A number of width problems arise when LaTeX cannot properly hyphenate a line. Please give LaTeX hyphenation hints using the \verb+\-+ command.
+
+\subsubsection*{Broader Impact Statement}
+\label{sec:broaderImpact}
+In this optional section, RLC encourages authors to discuss possible repercussions of their work, notably any potential negative impact that a user of this research should be aware of. 
+
+\subsubsection*{Acknowledgments}
+\label{sec:ack}
+Use unnumbered third level headings for the acknowledgments. All acknowledgments, including those to funding agencies, go at the end of the paper. Only add this information once your submission is accepted and deanonymized. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NOTE: THIS MARKS THE END OF THE "MAIN TEXT"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Bibliography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{main}
+\bibliographystyle{rlc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Appendices
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+\section{The first appendix}
+\label{sec:appendix1}
+This is an example of an appendix. 
+
+\noindent \textbf{Note:} You may move the appendices to appear before or after the references. Appendices before the references are viewed as part of the ``main text'' and are subject to the 8--12 page limit, are peer reviewed, and can contain content central to the claims of the paper. Appendices that appear after the references are not part of the ``main text,'' have no page limits, are not necessarily reviewed, and should not contain any claims or material central to the paper.
+
+\section{The second appendix}
+\label{sec:appendix2}
+This is an example of a second appendix. If there is only a single section in the appendix, you may simply call it ``Appendix'' as follows:
+
+\section*{Appendix}
+% No label, since this can't be referenced meaningfully with \ref{}.
+This format should only be used if there is a single appendix (unlike in this document).
+
+\end{document}
