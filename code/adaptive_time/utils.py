@@ -42,3 +42,53 @@ def argmax(x: np.ndarray) -> np.ndarray:
     max_val = np.max(x, axis=-1)
     idxes = np.where(x == max_val)[0]
     return np.random.choice(idxes)
+
+
+def discounted_returns(traj, gamma):
+    """Return all discounted returns for a trajectory."""
+    disc_returns = []
+    for i, st in enumerate(reversed(traj)):
+        if i == 0:
+            disc_returns.append(st[2])
+        else:
+            disc_returns.append(st[2] + gamma * disc_returns[-1])
+
+    return list(reversed(disc_returns))
+
+
+def approx_integrate(xs, tol, idxes):
+    """Approximately integrate using quadrature method.
+    
+    Approximates the integral of all `xs[0]`s, using the trapezoidal rule.
+    Critically, only a subset of the indices are used to approximate the integral.
+    These are placed in the `idxes` dictionary.
+
+    NOTE: this implementation assumes we can access the full integral, and
+    use that to decide if our approximation is good enough already.
+
+    Args:
+    - xs (2D np.ndarray): the input data, contains the function values
+        and their corresponding indices.
+    - tol (float): the tolerance for the approximation.
+    - idxes (Dict): an empty dictionary to store the indices in that we used.
+
+    Returns:
+        The approximate integral.
+    """
+    N = len(xs[0])
+    if N > 2:
+        Q = N * (xs[0,0] + xs[0,-1]) / 2
+        idxes[int(xs[1,0])] = 1
+        idxes[int(xs[1,-1])] = 1
+    else:
+        idxes[int(xs[1,0])] = 1
+        idxes[int(xs[1,-1])] = 1
+        return sum(xs[0])
+    truth = sum(xs[0])
+    if np.abs(Q - truth) > tol:
+        c = int(np.floor(N / 2))
+        Q = (
+            approx_integrate(xs[:,:c], tol / 2, idxes)
+            + approx_integrate(xs[:,c:], tol / 2, idxes))
+    return Q
+    
