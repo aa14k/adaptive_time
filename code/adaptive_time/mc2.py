@@ -3,6 +3,7 @@
 import numpy as np
 
 from adaptive_time import samplers
+from adaptive_time import utils
 
 
 def phi_sa(phi_x, a, prev_phi_sa=None):
@@ -33,14 +34,20 @@ def ols_monte_carlo(
     print(f"Using {len(pivots)}/{N} samples.")
 
     # TODO: optimize this.
+    all_returns = utils.discounted_returns(trajectory, gamma)
+
     G = 0
     x_sa = np.zeros((2, phi.num_parameters))
     returns_a0 = []  # from x0 (the initial state), action 0
     returns_a1 = []  # from x0 (the initial state), action 1
     for t in tqdm(range(N-1,-1,-1)):
+        state, action, reward, _ = trajectory[t]
         if t in pivots:
-            state, action, reward, _ = trajectory[t]
+            prev_G = G
             G = gamma * G + reward
+            if G != all_returns[t]:
+                print(f"Error in G: {G} != {all_returns[t]}")
+                assert False
             x = phi.get_fourier_feature(state)
             # Record empirical returns.
             if np.linalg.norm(x-x0) < 0.00001:
@@ -56,10 +63,12 @@ def ols_monte_carlo(
 
             features += np.outer(x_sa_flat, x_sa_flat)
             targets += G * x_sa_flat
+        else:
+            prev_G = G
+            G = gamma * G + reward
+
         try:
             weights = np.linalg.solve(features, targets)
         except np.linalg.LinAlgError:
             print("Singular matrix in OLS. Using previous weights.")
-    else:
-        G = gamma * G + reward
     return weights, targets, features, (np.mean(returns_a0), np.mean(returns_a1))
