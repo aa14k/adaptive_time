@@ -1,3 +1,5 @@
+import random
+
 from adaptive_time.environments.mountain_car import MountainCar
 from adaptive_time.environments.corridor import Corridor
 from adaptive_time.environments.cartpole import CartPoleEnv
@@ -31,3 +33,42 @@ def create_trajectories(env_ctor, num_trajectories, policy):
         trajectories.append((states, rewards))
 
     return trajectories
+
+
+def generate_trajectory(env, seed=None, policy=None, termination_prob=0.0):
+    """Generates a single trajectory from the environment using the given policy.
+
+    Note that the trajectory is generated until the environment terminates, and
+    truncations are not handled!
+    
+    Args:
+        env: The environment to generate the trajectory from.
+        policy: A function that takes in a state and returns an action. Defaults
+            to a random policy if not provided.
+        termination_prob: The probability of terminating the trajectory at each
+            step. Defaults to 0.0.
+    
+    Returns:
+        A list of transitions, where each transition is a tuple of
+        `(state, action, reward, next_state)`.
+    """
+    observation, _ = env.reset(seed=seed)
+    trajectory = []
+    terminated = False
+    steps = 0
+    if policy is None:
+        policy = lambda x: env.action_space.sample()
+    while not terminated:
+        steps += 1
+        action = policy(observation)
+        observation_, reward, terminated, truncated, info = env.step(action)
+        trajectory.append([observation, action, reward, observation_])
+        observation = observation_
+        if random.random() < termination_prob:
+            terminated = True
+
+        if steps % 5000 == 0:
+            print('Did 5000 steps!', steps)
+
+    return trajectory
+
