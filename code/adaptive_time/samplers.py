@@ -69,7 +69,8 @@ class AdaptiveQuadratureSampler(Sampler):
         integral_rule: str = "trapezoid",
         update_when_best: bool = True,
     ):
-        self.dt = dt
+        #self.dt = dt
+        self.dt = 1
         self.num_steps = num_steps
         self.tolerance_init = tolerance_init
         self._sample_times = np.arange(num_steps)

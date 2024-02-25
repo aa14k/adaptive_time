@@ -31,7 +31,7 @@ def ols_monte_carlo(
     
     N = len(trajectory)
     pivots = sampler.pivots(trajectory)
-    print(f"Using {len(pivots)}/{N} samples.")
+    #print(f"Using {len(pivots)}/{N} samples.")
 
     # Could optimize the below by iterating only over pivots,
     # and using the discounted returns from `all_returns` directly.
