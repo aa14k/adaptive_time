@@ -70,8 +70,8 @@ def generate_trajectory(
         if random.random() < termination_prob:
             terminated = True
 
-        if steps % 5000 == 0:
-            print('Did 5000 steps!', steps)
+        if steps % 20_000 == 0:
+            print('Did 20_000 steps!', steps)
         
         if max_steps is not None and steps > max_steps:
             print('Max steps reached!', steps)
