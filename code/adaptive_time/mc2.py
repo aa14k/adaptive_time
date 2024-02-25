@@ -67,8 +67,8 @@ def ols_monte_carlo(
             prev_G = G
             G = gamma * G + reward
 
-        try:
-            weights = np.linalg.solve(features, targets)
-        except np.linalg.LinAlgError:
-            print("Singular matrix in OLS. Using previous weights.")
+    try:
+        weights = np.linalg.solve(features, targets)
+    except np.linalg.LinAlgError:
+        print("Singular matrix in OLS. Using previous weights.")
     return weights, targets, features, (np.mean(returns_a0), np.mean(returns_a1))
