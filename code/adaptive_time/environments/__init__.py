@@ -35,7 +35,8 @@ def create_trajectories(env_ctor, num_trajectories, policy):
     return trajectories
 
 
-def generate_trajectory(env, seed=None, policy=None, termination_prob=0.0):
+def generate_trajectory(
+        env, seed=None, policy=None, termination_prob=0.0, max_steps=None):
     """Generates a single trajectory from the environment using the given policy.
 
     Note that the trajectory is generated until the environment terminates, and
@@ -47,6 +48,8 @@ def generate_trajectory(env, seed=None, policy=None, termination_prob=0.0):
             to a random policy if not provided.
         termination_prob: The probability of terminating the trajectory at each
             step. Defaults to 0.0.
+        max_steps: The maximum number of steps to take before terminating the
+            interaction. If we terminate, we return None. Defaults to None.
     
     Returns:
         A list of transitions, where each transition is a tuple of
@@ -67,8 +70,12 @@ def generate_trajectory(env, seed=None, policy=None, termination_prob=0.0):
         if random.random() < termination_prob:
             terminated = True
 
-        if steps % 5000 == 0:
-            print('Did 5000 steps!', steps)
+        if steps % 20_000 == 0:
+            print('Did 20_000 steps!', steps)
+        
+        if max_steps is not None and steps > max_steps:
+            print('Max steps reached!', steps)
+            return None
 
     return trajectory
 
