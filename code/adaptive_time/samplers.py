@@ -3,6 +3,44 @@ from typing import Any, List
 
 import numpy as np
 
+from adaptive_time import utils
+
+
+class Sampler2(ABC):
+    """Samplers return a list of indices to do updates at."""
+
+    def pivots(self, trajectory) -> List[np.ndarray]:
+        pass
+
+
+class AdaptiveQuadratureSampler2(Sampler2):
+    """Identifies pivots using quadrature methods."""
+
+    def __init__(self, tolerance: float) -> None:
+        super().__init__()
+        self._tolerance = tolerance
+    
+    def pivots(self, trajectory) -> List[np.ndarray]:
+        N = len(trajectory)
+        rewards = np.zeros((2, N))
+        for idx, traj in enumerate(trajectory):
+            rewards[0, idx] = traj[2]
+            rewards[1, idx] = idx
+        idxes = {}
+        _ = utils.approx_integrate(rewards, self._tolerance, idxes)
+        pivots = list(idxes.keys())
+        return np.array(pivots, dtype=np.int32)
+
+
+class UniformSampler2(Sampler2):
+    """Returns uniformly spaced pivots."""
+    def __init__(self, spacing: int) -> None:
+        super().__init__()
+        self._spacing = spacing
+
+    def pivots(self, trajectory) -> List[np.ndarray]:
+        return np.arange(0, len(trajectory), self._spacing)
+
 
 class Sampler(ABC):
     def adapt(self, **kwargs):
