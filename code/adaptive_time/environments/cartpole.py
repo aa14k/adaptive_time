@@ -193,6 +193,11 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             self.steps_beyond_terminated += 1
             reward = 0.0
 
+        # Normalize the reward to be independent of the time step length, i.e.
+        # make the reward is per second a constant.
+        # NOTE: users of the code should also adjust their discount factors
+        # appropriately.
+        reward *= self.tau / 0.02
         if self.render_mode == "human":
             self.render()
         return np.array(self.state, dtype=np.float32), reward, terminated, False, {}
