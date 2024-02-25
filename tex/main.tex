@@ -18,6 +18,38 @@
 \usepackage{subcaption}         % Allows for the use of subfigures and subcaptions
 \usepackage[space]{grffile}     % For spaces in image names
 \usepackage{url}                % For displaying urls
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% For theorems and such
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+
+% if you use cleveref..
+\usepackage[capitalize,noabbrev]{cleveref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\crefname{assumption}{Assumption}{Assumptions}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Title Page Specification
@@ -48,10 +80,10 @@
 
 \maketitle
 
-\input{tex/main_paper/abstract}
-\input{tex/main_paper/introduction}
-\input{tex/main_paper/setting}
-\input{tex/main_paper/algorithm}
+\input{main_paper/abstract}
+\input{main_paper/introduction}
+\input{main_paper/setting}
+\input{main_paper/algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% NOTE: THIS MARKS THE END OF THE "MAIN TEXT"
@@ -68,6 +100,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
-\input{tex/appendix/experiments}
+\input{appendix/experiments}
 
 \end{document}
