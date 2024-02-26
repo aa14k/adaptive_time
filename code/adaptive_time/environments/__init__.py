@@ -49,11 +49,14 @@ def generate_trajectory(
         termination_prob: The probability of terminating the trajectory at each
             step. Defaults to 0.0.
         max_steps: The maximum number of steps to take before terminating the
-            interaction. If we terminate, we return None. Defaults to None.
+            interaction. Defaults to None.
     
     Returns:
-        A list of transitions, where each transition is a tuple of
-        `(state, action, reward, next_state)`.
+        (traj, is_early_terminated), where
+        * traj is list of transitions, where each transition is a tuple of
+            `(state, action, reward, next_state)`.
+        * is_early_terminated is a boolean indicating if the trajectory was
+            terminated early due to `max_steps`.
     """
     observation, _ = env.reset(seed=seed)
     trajectory = []
@@ -75,9 +78,8 @@ def generate_trajectory(
             #print('Did 20_000 steps!', steps)
         
         if max_steps is not None and steps > max_steps:
-            pass
+            return trajectory, True
             #print('Max steps reached!', steps)
-            return None
 
-    return trajectory
+    return trajectory, False
 

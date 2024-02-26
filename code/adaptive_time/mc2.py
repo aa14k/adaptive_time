@@ -28,6 +28,19 @@ def phi_sa(phi_x, a, prev_phi_sa=None):
 def ols_monte_carlo(
         trajectory, sampler: samplers.Sampler2, tqdm,
         phi, weights, targets, features, x0, gamma = 0.999):
+    """Processes a trajectory to update the weights using OLS Monte Carlo.
+    
+    Args:
+    - trajectory: the trajectory to process
+    - sampler: the sampler used to subsample from the trajectory
+    - tqdm: pass a tqdm function to use for progress bars, or simply an identity function
+    - phi: an instance of fourier feature function class
+    - weights: UNUSED.
+    - targets: previous targets, will be updated with data from the new trajectory
+    - features: previous features, will be updated with data from the new trajectory
+    - x0: the initial state (used only for reporting)
+    - gamma: the discount factor
+    """
     
     N = len(trajectory)
     pivots = sampler.pivots(trajectory)
