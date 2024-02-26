@@ -75,7 +75,8 @@ def generate_trajectory(
             #print('Did 20_000 steps!', steps)
         
         if max_steps is not None and steps > max_steps:
-            print('Max steps reached!', steps)
+            pass
+            #print('Max steps reached!', steps)
             return None
 
     return trajectory

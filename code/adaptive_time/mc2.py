@@ -36,7 +36,7 @@ def ols_monte_carlo(
     # Could optimize the below by iterating only over pivots,
     # and using the discounted returns from `all_returns` directly.
     all_returns = utils.discounted_returns(trajectory, gamma)
-
+    prev_pivot = N-1
     G = 0
     x_sa = np.zeros((2, phi.num_parameters))
     returns_a0 = []  # from x0 (the initial state), action 0
@@ -61,9 +61,11 @@ def ols_monte_carlo(
 
             x_sa = phi_sa(x, action, x_sa)
             x_sa_flat = x_sa.flatten()
-
-            features += np.outer(x_sa_flat, x_sa_flat)
-            targets += G * x_sa_flat
+            if t != N-1:
+                dt = prev_pivot - t
+                prev_pivot = t
+                features += dt * np.outer(x_sa_flat, x_sa_flat)
+                targets += dt * G * x_sa_flat
         else:
             prev_G = G
             G = gamma * G + reward
