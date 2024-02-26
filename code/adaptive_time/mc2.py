@@ -74,11 +74,13 @@ def ols_monte_carlo(
 
             x_sa = phi_sa(x, action, x_sa)
             x_sa_flat = x_sa.flatten()
-            if t != N-1:
+            if t == N-1:
+                dt = 1
+            else:
                 dt = prev_pivot - t
                 prev_pivot = t
-                features += dt * np.outer(x_sa_flat, x_sa_flat)
-                targets += dt * G * x_sa_flat
+            features += dt * np.outer(x_sa_flat, x_sa_flat)
+            targets += dt * G * x_sa_flat
         else:
             prev_G = G
             G = gamma * G + reward
