@@ -56,6 +56,12 @@ def discounted_returns(traj, gamma):
     return list(reversed(disc_returns))
 
 
+def total_returns(traj):
+    """Return all discounted returns for a trajectory."""
+    rewards = np.array([st[2] for st in traj])
+    return np.flip(np.cumsum(np.flip(rewards)))
+
+
 def approx_integrate(xs, tol, idxes):
     """Approximately integrate using quadrature method.
     

@@ -169,7 +169,6 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         theta_dot = min(1, max(theta_dot, -1))
         x = min(self.x_threshold, max (x, -self.x_threshold))
         self.state = (x, x_dot, theta, theta_dot)
-        c = np.random.uniform()
 
         terminated = bool(
             x < -self.x_threshold
@@ -177,8 +176,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             or theta < -self.theta_threshold_radians
             or theta > self.theta_threshold_radians
         )
-        if c < 1.0/500000.0:
-            terminated = True
+
         if not terminated:
             reward = reward_function
         elif self.steps_beyond_terminated is None:

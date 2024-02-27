@@ -28,6 +28,19 @@ def phi_sa(phi_x, a, prev_phi_sa=None):
 def ols_monte_carlo(
         trajectory, sampler: samplers.Sampler2, tqdm,
         phi, weights, targets, features, x0, gamma = 0.999):
+    """Processes a trajectory to update the weights using OLS Monte Carlo.
+    
+    Args:
+    - trajectory: the trajectory to process
+    - sampler: the sampler used to subsample from the trajectory
+    - tqdm: pass a tqdm function to use for progress bars, or simply an identity function
+    - phi: an instance of fourier feature function class
+    - weights: UNUSED.
+    - targets: previous targets, will be updated with data from the new trajectory
+    - features: previous features, will be updated with data from the new trajectory
+    - x0: the initial state (used only for reporting)
+    - gamma: the discount factor
+    """
     
     N = len(trajectory)
     pivots = sampler.pivots(trajectory)
@@ -36,7 +49,7 @@ def ols_monte_carlo(
     # Could optimize the below by iterating only over pivots,
     # and using the discounted returns from `all_returns` directly.
     all_returns = utils.discounted_returns(trajectory, gamma)
-
+    prev_pivot = N-1
     G = 0
     x_sa = np.zeros((2, phi.num_parameters))
     returns_a0 = []  # from x0 (the initial state), action 0
@@ -61,9 +74,13 @@ def ols_monte_carlo(
 
             x_sa = phi_sa(x, action, x_sa)
             x_sa_flat = x_sa.flatten()
-
-            features += np.outer(x_sa_flat, x_sa_flat)
-            targets += G * x_sa_flat
+            if t == N-1:
+                dt = 1
+            else:
+                dt = prev_pivot - t
+                prev_pivot = t
+            features += dt * np.outer(x_sa_flat, x_sa_flat)
+            targets += dt * G * x_sa_flat
         else:
             prev_G = G
             G = gamma * G + reward
