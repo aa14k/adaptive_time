@@ -28,6 +28,8 @@ class BudgetType(enum.Enum):
     UPDATES = 2
 
 
+_NUM_ACTIONS = 2
+
 
 def register_gym_envs():
     gym.register(
@@ -63,6 +65,9 @@ def run_experiment(
     if tqdm is None:
         tqdm_use = lambda x: x
 
+    if max_env_steps is not None:
+        raise ValueError("max_env_steps is not supported in this version.")
+
     # We record:
     returns = []  # The total return at the end of each episode.
     # And how many updates/interactions we have done by that point:
@@ -74,6 +79,9 @@ def run_experiment(
     # Each element of these will be a (2,)-np.array, so we can just stack them.
     returns_per_episode_q = []
     predicted_returns_q = []
+    # The value.
+    returns_per_episode_v = []
+    predicted_returns_v = []
 
     reset_randomness(seed, env)
 
@@ -97,15 +105,19 @@ def run_experiment(
             raise ValueError("Unknown budget type")
 
     def policy(state, weights):
+        """Returns the action to take, and maybe the prob of all actions"""
         if random.random() < epsilon:
-            return env.action_space.sample()
+            action = env.action_space.sample()
+            return action
+
         # Otherwise calculate the best action.
         x = phi.get_fourier_feature(state)
-        qs = np.zeros(2)
-        for action in [0, 1]:
+        qs = np.zeros(_NUM_ACTIONS)
+        for action in range(_NUM_ACTIONS):
             x_sa = mc2.phi_sa(x, action)
             qs[action] = np.inner(x_sa.flatten(), weights)
         # adaptive_time.utils.softmax(qs, 1)
+        
         return adaptive_time.utils.argmax(qs)
     
     if weights_to_evaluate is not None:
@@ -120,7 +132,7 @@ def run_experiment(
         trajectory, early_term = environments.generate_trajectory(
                 env, policy=policy_to_use,
                 # env, policy=lambda s: policy(state=s, weights=weights),
-                termination_prob=termination_prob, max_env_steps=max_env_steps)
+                termination_prob=termination_prob, max_steps=max_env_steps)
         
         # Process and record the return.
         returns.append(sum(ts[2] for ts in trajectory))
@@ -137,8 +149,10 @@ def run_experiment(
         assert early_term is False, "We should not terminate early in this experiment."
 
         # Do updates, record stats from the processed trajectory.
-        weights, targets, features, cur_avr_returns, num_pivots = mc2.ols_monte_carlo(
-            trajectory, sampler, tqdm_use, phi, weights, targets, features, x_0, gamma)
+        (weights, targets, features, cur_avr_returns_q, cur_avr_returns_v,
+         num_pivots) = mc2.ols_monte_carlo(
+            trajectory, sampler, tqdm_use, phi, weights, targets,
+            features, x_0, gamma)
         
         # Update the stats.
         total_pivots.append(total_pivots[-1] + num_pivots)
@@ -148,10 +162,16 @@ def run_experiment(
         # Store the empirical and predicted returns. For any episode, we may
         # or may not have empirical returns for both actions. When we don't have an
         # estimate, `nan` is returned.
-        returns_per_episode_q.append(cur_avr_returns)
+        returns_per_episode_q.append(cur_avr_returns_q)
         predicted_returns_q.append(np.array(
             [np.inner(x_sa0.flatten(), weights),
                 np.inner(x_sa1.flatten(), weights)]))
+        
+        # Also update the value estimates.
+        returns_per_episode_v.append(cur_avr_returns_v)
+        predicted_returns_v.append(
+            adaptive_time.utils.v_from_eps_greedy_q(
+                epsilon, predicted_returns_q[-1]))
     
     # The following variant produces plots where we can see
     # the effect of the last update.
@@ -159,7 +179,7 @@ def run_experiment(
     trajectory, early_term = environments.generate_trajectory(
         env, policy=policy_to_use,
         # env, policy=lambda s: policy(state=s, weights=weights),
-        termination_prob=termination_prob, max_env_steps=max_env_steps)
+        termination_prob=termination_prob, max_steps=max_env_steps)
     returns.append(sum(ts[2] for ts in trajectory))
 
     return {
@@ -169,6 +189,8 @@ def run_experiment(
         "num_episode": num_episode,
         "returns_per_episode_q": returns_per_episode_q,
         "predicted_returns_q": predicted_returns_q,
+        "returns_per_episode_v": returns_per_episode_v,
+        "predicted_returns_v": predicted_returns_v,
     }
     
     # The following variant produces plots where we

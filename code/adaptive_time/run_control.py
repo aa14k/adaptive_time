@@ -9,7 +9,7 @@ def run_control():
         "save_limit": None,    # 40_000
 
         "termination_prob": 1.0/10000.0,   # 1.0/500000.0
-        "max_env_steps": None,
+        "max_env_steps": None,  # Not supported due to truncation issues.
         "epsilon": 0.05,
         "gamma": 0.99999,
 
