@@ -1,2 +1,14 @@
 \section{Problem Setting}
-There are multiple ways to look and define this problem.
+Reinforcement learning is often modeled as a Markov decision process (MDP) given by the tuple $M = (\mcS, \mcA, P, R)$. In this model, an agent and environment interact over a sequence of time steps $t$. At each time step, the agent receives a state $S_t \in \mcS$ from the environment, where $\mcS$ denotes the set of all possible states. The agent uses the information given by the state to select and action $A_t$ from the set of possible actions $\mcA$. Based on the state of the environment and the agents behavior, i.e. action, the agent receives a scalar reward $R_t = R(S_t,A_t)$ and transitions to the next state $S_{t+1} \in \mcS$ according to the state-transition probability $P(s'|s,a) = P(S_{t+1} = s' | S_t = s, A_t = a)$ for each $s,s' \in \mcS$ and $a \in \mcA$. 
+
+The behavior of an agent is given by a policy $\pi (a|s)$, which is a probability distribution over actions given a state. The agent's goal is to learn the optimal policy, $\pi^\star$, which is the policy that maximizes the expected discounted return
+\begin{align*}
+    G_t = R_{t} + \gamma R_{t+1} + \gamma^2 R_{t+1} + \dots = \sum_{k=1}^{T-t} \gamma^{k-1} R_{t+k-1}
+\end{align*}
+either for a discounted factor $\gamma \in [0,1)$ when the task is continuing, $T = \infty$, or $\gamma \in [0,1]$ and $T < \infty$ in episodic task.
+
+Through the process of policy iteration, Monte-Carlo algorithms strive to maximize the expected return by computing value-functions that estimate the expected future returns. The state-value function is quantifies the agent's expected return starting in state $s$ and following policy $\pi$, i.e. $v^\pi(s) = \EE_\pi [G_t | S_t =s]$. When learning to control in RL, we often want to estimate the action-value function, which is the agent's expected return starting in state $s$, taking action $a$ and then following policy $\pi$, i.e.
+\begin{align*}
+    q_\pi(s,a) = \mathbb{E}_\pi[G_t \, | \, S_t = s, A_t = a].
+\end{align*}
+Often in RL, it is useful to use function approximation to learn the action-values. 
