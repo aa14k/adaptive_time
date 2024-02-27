@@ -1,7 +1,7 @@
 \section{Algorithm}
 
 \begin{proposition}
-    Given tolerance $\tau > 0$ and a real-valued list $xs$ of size $N$, \cref{alg:adaptive-quadrature} returns an approximate sum $Q$ that satisfies $|Q - \text{sum}(xs)| \leq \tau$.  
+    Given tolerance $\tau \geq 0$ and a real-valued list $xs$ of size $N$, \cref{alg:adaptive-quadrature} returns an approximate sum $Q$ that satisfies $|Q - \text{sum}(xs)| \leq \tau$.  
 \end{proposition}
 \begin{proof}
     This proof will follow by induction. Assume that $N < 3$. Then \cref{alg:adaptive-quadrature} returns $Q = \text{sum}(xs)$. Therefore $|Q - \text{sum}(xs)| = |\text{sum}(xs) - \text{sum}(xs)| = 0 \leq \tau$ for all $\tau \geq 0$. 
@@ -12,7 +12,7 @@
 \begin{algorithm}[t]
     \caption{\textsc{Adaptive-Quadrature}}\label{alg:adaptive-quadrature}
     \begin{algorithmic}
-    \State \textbf{Input:} A list $xs$ and tolerance $\tau\geq0$
+    \State \textbf{Input:} A list $xs$ and tolerance $\tau \geq 0$
     \State $N \leftarrow \text{length}(xs)$.
     \If{N > 2}
         \State $Q \leftarrow N \cdot (xs[0] + xs[-1]) / 2$.
