@@ -261,7 +261,8 @@ def run_generic(config_dict, samplers_tried):
         results[name] = Parallel(n_jobs = num_runs)(
             delayed(run_experiment)(
                 seed+run, env, phi, sampler, epsilon, budget, budget_type,
-                termination_prob, max_env_steps, gamma=gamma, file_postfix=name + "_" + date_postfix,
+                termination_prob, max_env_steps, gamma=gamma,
+                file_postfix=name + "_" + date_postfix,
                 tqdm=None, print_trajectory=False, save_threshold=save_limit,
                 weights_to_evaluate=weights_to_evaluate)
                 for run in range(num_runs)
