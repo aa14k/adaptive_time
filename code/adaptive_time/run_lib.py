@@ -148,8 +148,9 @@ def run_experiment(
 
 
     while remaining_steps() > 0:
+        print(maybe_switch_policy)
         if maybe_switch_policy:
-            if random.random() < policy_to_evaluate[2]:
+            if random.random() < 0.5:
                 policy_to_use = ActionIterator(policy_to_evaluate[0])
             else:
                 policy_to_use = ActionIterator(policy_to_evaluate[1])
