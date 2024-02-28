@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from typing import Dict
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 
@@ -34,14 +34,56 @@ def softmax(x: np.ndarray) -> np.ndarray:
 
 
 def argmax(x: np.ndarray) -> np.ndarray:
-    """
-    Argmax operation on the last axis---randomly break ties
+    """ Argmax operation on the last axis---randomly break ties
+
+    Cannot actually handle ndim > 1 matrices where the last
+    dimension is not singleton.
+    
     - x (np.ndarray): values
 
     """
+    a, _ = argmax_with_probs(x, calc_action=True, calc_probs=False)
+    return a
+
+
+def argmax_with_probs(
+        x: np.ndarray, *, calc_action, calc_probs
+) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+    """ Argmax operation on the last axis---randomly break ties
+
+    Cannot actually handle ndim > 1 matrices where the last
+    dimension is not singleton.
+    
+    - x (np.ndarray): values
+
+    """
+    if x.ndim > 1:
+        raise ValueError("Cannot handle ndim > 1 matrices?")
     max_val = np.max(x, axis=-1)
     idxes = np.where(x == max_val)[0]
-    return np.random.choice(idxes)
+    action = np.random.choice(idxes) if calc_action else None
+
+    if calc_probs:
+        probs = np.zeros(x.shape[-1])
+        probs[idxes] = 1 / len(idxes)
+    else:
+        probs = None
+
+    return action, probs
+
+
+def eps_greedy_policy_probs(epsilon, qs):
+    num_actions = qs.shape[-1]
+    eps_probs = epsilon * np.ones(num_actions) / num_actions
+    _, greedy_probs = argmax_with_probs(
+        qs, calc_action=False, calc_probs=True)
+    total_probs = (1 - epsilon) * greedy_probs + eps_probs
+    return total_probs
+
+
+def v_from_eps_greedy_q(epsilon, qs):
+    action_probs = eps_greedy_policy_probs(epsilon, qs)
+    return np.dot(action_probs, qs)
 
 
 def discounted_returns(traj, gamma):

@@ -10,8 +10,9 @@ def run_control():
         # Save models that get more than this return:
         "save_limit": None,    # 40_000
 
+        # We have to ensure that the policy we evaluate fails eventually!
         "termination_prob": 0,
-        "max_env_steps": 1_000_000,
+        "max_env_steps": None,  # Not supported due to truncation issues.
         "epsilon": 0.00,
         "gamma": 0.99999,
 

@@ -67,10 +67,8 @@ def ols_monte_carlo(
             if np.linalg.norm(x-x0) < 0.00001:
                 if action == 0:
                     returns_a0.append(G)
-                    returns_a1.append(-0)
                 elif action == 1:
                     returns_a1.append(G)
-                    returns_a0.append(-0)
 
             x_sa = phi_sa(x, action, x_sa)
             x_sa_flat = x_sa.flatten()
@@ -89,4 +87,11 @@ def ols_monte_carlo(
         weights = np.linalg.solve(features, targets)
     except np.linalg.LinAlgError:
         print("Singular matrix in OLS. Using previous weights.")
-    return weights, targets, features, (np.mean(returns_a0), np.mean(returns_a1)), len(pivots)
+    
+    est_return_qs = (np.nanmean(returns_a0), np.nanmean(returns_a1))
+    est_return_v = np.mean(returns_a0 + returns_a1)
+    return (
+        weights, targets, features,
+        est_return_qs, est_return_v,
+        len(pivots)
+    )
