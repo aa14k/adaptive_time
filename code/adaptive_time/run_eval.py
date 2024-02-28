@@ -16,7 +16,7 @@ def run_control():
         "epsilon": 0.00,
         "gamma": 0.99999,
 
-        "budget": 1_000,
+        "budget": 20_000,
         "budget_type": run_lib.BudgetType.UPDATES,
         # "budget": 10_000,
         # "budget_type": BudgetType.INTERACTIONS,
