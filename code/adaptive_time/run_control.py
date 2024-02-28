@@ -21,8 +21,9 @@ def run_control():
         "num_runs": 2,  # Number of runs for each configuration.
         "tau": 0.002,   # The stepTime of the environment.
 
-        # If None, we do control. Otherwise, we evaluate these weights.
+        # If None, we do control. Otherwise, we evaluate these weights/actions.
         "weights_to_evaluate": None,  
+        "policy_to_evaluate": None,
 
         # The features cannot be set through a config for now.
         # They are defined in run_lib.py

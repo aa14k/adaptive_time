@@ -49,13 +49,24 @@ def reset_randomness(seed, env):
     env.action_space.seed(seed)    
 
 
+class ActionIterator:
+    def __init__(self, action_sequence):
+        self.action_sequence = action_sequence
+        self.idx = 0
+    
+    def __call__(self, state):
+        action = self.action_sequence[self.idx]
+        self.idx += 1
+        return action
+
+
 def run_experiment(
         seed, env, phi, sampler, epsilon,
         budget, budget_type: BudgetType,
         termination_prob, max_env_steps,
         gamma, file_postfix, tqdm=None, print_trajectory=False,
         save_threshold=None,
-        weights_to_evaluate=None):
+        weights_to_evaluate=None, policy_to_evaluate=None):
     """Keeps interacting until the budget is (approximately) used up, returns stats.
     
     Note that the budgets are in terms of processed interactions (or updates). We
@@ -120,14 +131,28 @@ def run_experiment(
         
         return adaptive_time.utils.argmax(qs)
     
+    if (weights_to_evaluate is not None
+        and policy_to_evaluate is not None):
+        raise ValueError(
+            "Both weights_to_evaluate and policy_to_evaluate are set.")
+
+    maybe_switch_policy = False
     if weights_to_evaluate is not None:
         # Evaluate the given weights, not doing control.
         policy_to_use = lambda s: policy(state=s, weights=weights_to_evaluate)
+    elif policy_to_evaluate is not None:
+        # Evaluate the given sequence of actions, not doing control.
+        maybe_switch_policy = True
     else:
         policy_to_use = lambda s: policy(state=s, weights=weights)
 
 
     while remaining_steps() > 0:
+        if maybe_switch_policy:
+            if random.random() < policy_to_evaluate[2]:
+                policy_to_use = ActionIterator(policy_to_evaluate[0])
+            else:
+                policy_to_use = ActionIterator(policy_to_evaluate[1])
 
         trajectory, early_term = environments.generate_trajectory(
                 env, policy=policy_to_use,
@@ -176,11 +201,12 @@ def run_experiment(
     # The following variant produces plots where we can see
     # the effect of the last update.
     # Do one more evaluation run.
-    trajectory, early_term = environments.generate_trajectory(
-        env, policy=policy_to_use,
-        # env, policy=lambda s: policy(state=s, weights=weights),
-        termination_prob=termination_prob, max_steps=max_env_steps)
-    returns.append(sum(ts[2] for ts in trajectory))
+    if not maybe_switch_policy:
+        trajectory, early_term = environments.generate_trajectory(
+            env, policy=policy_to_use,
+            # env, policy=lambda s: policy(state=s, weights=weights),
+            termination_prob=termination_prob, max_steps=max_env_steps)
+        returns.append(sum(ts[2] for ts in trajectory))
 
     return {
         "total_return": returns,
@@ -238,6 +264,7 @@ def run_generic(config_dict, samplers_tried):
     num_runs = config_dict.pop("num_runs")
     tau = config_dict.pop("tau")
     weights_to_evaluate = config_dict.pop("weights_to_evaluate")
+    policy_to_evaluate = config_dict.pop("policy_to_evaluate")
     if config_dict:
         raise ValueError(f"Unknown additional configs:\n{config_dict}")
     
@@ -251,6 +278,19 @@ def run_generic(config_dict, samplers_tried):
         elif isinstance(weights_to_evaluate, str):
             # Load the weights from the given file.
             weights_to_evaluate = np.load(weights_to_evaluate)
+    if policy_to_evaluate is not None:
+        assert len(policy_to_evaluate) == 3
+        if isinstance(policy_to_evaluate[0], str):
+            # Load the policy from the given file.
+            pol1 = np.load(policy_to_evaluate[0])
+        else:
+            raise ValueError()
+        if isinstance(policy_to_evaluate[1], str):
+            # Load the policy from the given file.
+            pol2 = np.load(policy_to_evaluate[1])
+        else:
+            raise ValueError()
+        policy_to_evaluate = (pol1, pol2, policy_to_evaluate[2])
 
     date_postfix = datetime.now().strftime("%Y%m%d-%H%M%S")
 
@@ -264,7 +304,8 @@ def run_generic(config_dict, samplers_tried):
                 termination_prob, max_env_steps, gamma=gamma,
                 file_postfix=name + "_" + date_postfix,
                 tqdm=None, print_trajectory=False, save_threshold=save_limit,
-                weights_to_evaluate=weights_to_evaluate)
+                weights_to_evaluate=weights_to_evaluate,
+                policy_to_evaluate=policy_to_evaluate)
                 for run in range(num_runs)
             )
 

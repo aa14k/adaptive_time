@@ -22,10 +22,22 @@ def run_control():
         # "budget_type": BudgetType.INTERACTIONS,
 
         "num_runs": 2,  # Number of runs for each configuration.
-        "tau": 0.002,   # The stepTime of the environment.
+        "tau": 0.02,   # The stepTime of the environment.
 
-        # If None, we do control. Otherwise, we evaluate these weights.
-        "weights_to_evaluate": 0,
+        # We may evaluate some fixed weights, or a sequence of actions.
+        # Option 1: Evaluate a fixed set of weights.
+        #    set to None to not do this.
+        #    set to a string to load the weights from a file.
+        #    set to 0 to evaluate the 0 vector.
+        "weights_to_evaluate": None,
+        # Option 2: Evaluate a sequence of actions.
+        #    set to None to not do this.
+        #    set to a string to load the sequence of actions from a file.
+        "policy_to_evaluate": (
+            "/Users/szepi1991/Code/adaptive_time/policy_to_eval_good.npy",
+            "/Users/szepi1991/Code/adaptive_time/policy_to_eval_bad.npy",
+            0.5  # What prob to use the good policy.
+        ),
 
         # The features cannot be set through a config for now.
         # They are defined in run_lib.py
