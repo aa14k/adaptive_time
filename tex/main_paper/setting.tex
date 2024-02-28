@@ -7,8 +7,25 @@ The behavior of an agent is given by a policy $\pi (a|s)$, which is a probabilit
 \end{align*}
 either for a discounted factor $\gamma \in [0,1)$ when the task is continuing, $T = \infty$, or $\gamma \in [0,1]$ and $T < \infty$ in episodic task.
 
-Through the process of policy iteration, Monte-Carlo algorithms strive to maximize the expected return by computing value-functions that estimate the expected future returns. The state-value function is quantifies the agent's expected return starting in state $s$ and following policy $\pi$, i.e. $v^\pi(s) = \EE_\pi [G_t | S_t =s]$. When learning to control in RL, we often want to estimate the action-value function, which is the agent's expected return starting in state $s$, taking action $a$ and then following policy $\pi$, i.e.
-\begin{align*}
+Through the process of policy iteration \cite{sutton1998introduction}, Monte-Carlo algorithms strive to maximize the expected return by computing value-functions that estimate the expected future returns. The state-value function is quantifies the agent's expected return starting in state $s$ and following policy $\pi$, i.e. $v^\pi(s) = \EE_\pi [G_t | S_t =s]$. When learning to control in RL, we often want to estimate the action-value function, which is the agent's expected return starting in state $s$, taking action $a$ and then following policy $\pi$, i.e.
+\begin{equation}\label{eqn:action-values}
     q_\pi(s,a) = \mathbb{E}_\pi[G_t \, | \, S_t = s, A_t = a].
-\end{align*}
-Often in RL, it is useful to use function approximation to learn the action-values. 
+\end{equation}
+In many RL problems of interest, the state-space $\mcS$ is prohibitively large and function approximation is needed in order to enable sample-efficient learning. For clarity, the algorithmic ideas in this paper are initial presented as linear solution methods, but can be extended to arbitrary function approximation schemes. Given a set of linear features $\phi : \mcS \times \mcA \rightarrow \mbR^d$ and a trajectory $S_1,A_1,R_1,\dotsc,R_T,S_{T+1}$ collected following policy $\pi$ in $M$, the action values can be approximated by solving the least-squares problem
+\begin{equation}
+    \hat\theta = \argmin_{\theta \in \mbR^d} \sum_t \left(\phi(S_t,A_t)^\top \theta - G_t\right)^2
+\end{equation}
+and letting $q_\pi(s,a) \approx \phi(s,a)^\top \hat\theta$. With good features and enough data, the minimizer of the least-squares problem is a good approximation of the action-value function. 
+\subsection{Monte-Carlo Policy Iteration} Our main objective in \textit{policy iteration} is to maximize the expected return from observations collected via interacted with the environment, ideally using as few updates as possible. Monte-Carlo policy iteration works by first performing policy evaluation to learn the action-values using the returns and then acting greedily with respected to the learned action-values. Monte-Carlo policy iteration can be summarized as 
+\begin{enumerate}
+    \item (Policy evaluation): Collect $N \in \mathbb{N}$ trajectories $S_{1},A_1,R_1,\dotsc,R_T,S_{T+1}$ following policy $\pi$ in MDP $M$. Then solve the least squares problem 
+    \begin{align*}
+        \hat\theta = \argmin_{\theta \in \mbR^d} \sum_{i=1}^N\sum_{t=1}^T \left(\phi(S_{t,i},A_{t,i})^\top \theta - G_{t,i}\right)^2
+    \end{align*}
+    where $S_{t,i}$ corresponds to the $t$-th state in the $i$-th trajectory for $i \in \{1,\dotsc,N\}$ and $t \in \{1,\dotsc,T\}$.
+    \item (Greedify): Take the new policy to be the policy that is greedy with respect to the approximate action-values, i.e. $\pi(s) = \argmax_{a \in \mcA} \phi(s,a)^\top \hat\theta \approx \argmax q^{\pi'}(s,a)$ where $\pi'$ is the previous policy.
+\end{enumerate}
+In this work, we propose further discretizing, or subsampling, the trajectory in order to learn with as few updates as possible. \cite{zhang2024managing} establishes the advantage of updating using only a subset of the tuples in the trajectory when performing Monte-Carlo value estimation. In their work, they show, both theoretically and empirically, that a simple uniform discretization over the trajectory, i.e. updating using every $M$-th tuple in the trajectory, leads to significantly better value estimation when the number of updates is fixed. In the next section we will introduce both a uniform scheme for discretizing the Monte-Carlo updates and an adaptive scheme for discretizing the updates.
+
+
+

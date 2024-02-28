@@ -1,5 +1,5 @@
 \section{Algorithm}
-
+In this section, we detail both a uniform and adaptive method for discretizing the trajectories when performing updates in Monte-Carlo policy iteration. 
 \begin{proposition}
     Given tolerance $\tau \geq 0$ and a real-valued list $xs$ of size $N$, \cref{alg:adaptive-quadrature} returns an approximate sum $Q$ that satisfies $|Q - \text{sum}(xs)| \leq \tau$.  
 \end{proposition}
@@ -10,20 +10,61 @@
 \end{proof}
 
 \begin{algorithm}[t]
-    \caption{\textsc{Adaptive-Quadrature}}\label{alg:adaptive-quadrature}
+    \caption{\textsc{Adaptive}}\label{alg:adaptive-quadrature}
     \begin{algorithmic}
-    \State \textbf{Input:} A list $xs$ and tolerance $\tau \geq 0$
-    \State $N \leftarrow \text{length}(xs)$.
-    \If{N > 2}
-        \State $Q \leftarrow N \cdot (xs[0] + xs[-1]) / 2$.
+    \State \textbf{Input:} A list of real numbers $xs$, a list of integers $idx$, dictionary $idxes$ and tolerance $\tau \geq 0$
+    \State $N = \text{length}(xs)$.
+    \If{$N \geq 2$}
+        \State $idxes[idx[0]] = 1$ and $idxes[idx[-1]] = 1$
+        \State $Q = N \cdot (xs[0] + xs[-1]) / 2$.
     \Else
-        \State \Return $\text{sum}(xs)$.
+        \State $idxes[idx[0]] =1$
+        \State \Return $xs[0]$
     \EndIf
-    \State $\varepsilon \leftarrow |Q - \text{sum}(xs)|$
+    \State $\varepsilon = |Q - \text{sum}(xs)|$
     \If{$\varepsilon \geq \tau$}
-        \State $c \leftarrow \lfloor N / 2 \rfloor$.
-        \State $Q \leftarrow \textsc{Adaptive-Quadrature}(xs[:c], \tau /2) + \textsc{Adaptive-Quadrature}(xs[c:], \tau /2)$
+        \State $c = \lfloor N / 2 \rfloor$.
+        \State $Q, idxes = \textsc{Adaptive}(xs[:c], idx[:c], \tau /2, idxes) + \textsc{Adaptive}(xs[c:], idx[c:], \tau /2, idxes)$
     \EndIf
-    \State \Return $Q$.
+    \State \Return $Q, idxes$.
     \end{algorithmic}
     \end{algorithm}
+
+
+    \begin{algorithm}[t]
+        \caption{\textsc{Uniform}}\label{alg:uniform}
+        \begin{algorithmic}
+        \State \textbf{Input:} Integers $N,M$.
+        \State $idxes = []$, $idx = 0$ and $i=0$
+        \While{$idx < N-1$}
+        \State $idx = i * M$
+        \State $idxes.$append$(i * M)$
+        \State $i = i + 1$
+        \EndWhile
+        \State \Return $idxes$.
+        \end{algorithmic}
+        \end{algorithm}
+
+
+
+        \begin{algorithm}[t]
+            \caption{\textsc{Monte-Carlo Policy Iteration}}\label{alg:mc}
+            \begin{algorithmic}
+            \State \textbf{Input:} Action-value features $\phi: \mcS \times \mcA \rightarrow \mbR^d$, number of evaluation trajectories $N$, a tolerance $\tau \geq 0$ and uniform spacing integer $M$ and dictionary of update points pivots = $\{\}$.
+            \State \textbf{Initialize} the action value weights $\theta_0 \in \mbR^d$ arbitrarily
+            \For{$i = 1,2,\dotsc$}
+                \State $\pi_i(s) = \argmax_{a \in \mcA} \phi(s,a)^\top \theta_{i-1}$
+                \For{$j = 1,2,\dotsc,N$}
+                    \State Collect trajectories $S_{1,i,j},A_{1,i,j},R_{1,i,j},\dotsc,R_{T,i,j},S_{T+1,i,j}$ using policy $\pi_i$
+                    \If{uniform}
+                    \State pivots$[i,j] = \textsc{uniform}(T, M)$
+                    \ElsIf{adaptive}
+                    \State temp, pivots$[i,j] = \textsc{adaptive}([R_{1:T,i,j}], \{1,2,\dotsc,T\},\{\}, \tau])$
+                    \Else
+                    \State pivots$[i,j]=\{1,2,\dotsc,T\}$
+                    \EndIf
+                \EndFor
+                \State Update $\theta_i = \argmin_{\theta \in \mbR^d} \sum_{i,j}\sum_{t\in\text{pivots}[i,j]} \left(\phi(S_{t,i,j},A_{t,i,j}) - G_{t,i,j}\right)^2$
+            \EndFor
+            \end{algorithmic}
+            \end{algorithm}
