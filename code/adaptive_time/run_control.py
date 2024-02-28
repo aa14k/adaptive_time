@@ -13,6 +13,8 @@ def run_control():
         "epsilon": 0.05,
         "gamma": 0.99999,
 
+        "do_weighing": True,   # Of the updates. Normally True.
+
         "budget": 1_000,
         "budget_type": run_lib.BudgetType.UPDATES,
         # "budget": 10_000,
@@ -24,6 +26,8 @@ def run_control():
         # If None, we do control. Otherwise, we evaluate these weights/actions.
         "weights_to_evaluate": None,  
         "policy_to_evaluate": None,
+
+        # "use_joblib": True,  # Whether to use joblib for parallelization.
 
         # The features cannot be set through a config for now.
         # They are defined in run_lib.py

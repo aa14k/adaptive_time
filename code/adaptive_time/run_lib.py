@@ -63,7 +63,7 @@ class ActionIterator:
 def run_experiment(
         seed, env, phi, sampler, epsilon,
         budget, budget_type: BudgetType,
-        termination_prob, max_env_steps,
+        termination_prob, max_env_steps, do_weighing,
         gamma, file_postfix, tqdm=None, print_trajectory=False,
         save_threshold=None,
         weights_to_evaluate=None, policy_to_evaluate=None):
@@ -136,19 +136,26 @@ def run_experiment(
         raise ValueError(
             "Both weights_to_evaluate and policy_to_evaluate are set.")
 
+    control = None         # Whether we are doing control.
     maybe_switch_policy = False
     if weights_to_evaluate is not None:
         # Evaluate the given weights, not doing control.
         policy_to_use = lambda s: policy(state=s, weights=weights_to_evaluate)
+        control = False
     elif policy_to_evaluate is not None:
         # Evaluate the given sequence of actions, not doing control.
         maybe_switch_policy = True
+        control = False
     else:
         policy_to_use = lambda s: policy(state=s, weights=weights)
+        control = True
 
+    # For evaluation, we keep track of how many times we took
+    # each action in the first timestep.
+    # SHOULD we do this each time we visit the initial state?
+    first_action_counts = np.zeros(_NUM_ACTIONS)
 
     while remaining_steps() > 0:
-        print(maybe_switch_policy)
         if maybe_switch_policy:
             if random.random() < 0.5:
                 policy_to_use = ActionIterator(policy_to_evaluate[0])
@@ -178,7 +185,7 @@ def run_experiment(
         (weights, targets, features, cur_avr_returns_q, cur_avr_returns_v,
          num_pivots) = mc2.ols_monte_carlo(
             trajectory, sampler, tqdm_use, phi, weights, targets,
-            features, x_0, gamma)
+            features, x_0, do_weighing, gamma)
         
         # Update the stats.
         total_pivots.append(total_pivots[-1] + num_pivots)
@@ -195,9 +202,17 @@ def run_experiment(
         
         # Also update the value estimates.
         returns_per_episode_v.append(cur_avr_returns_v)
-        predicted_returns_v.append(
-            adaptive_time.utils.v_from_eps_greedy_q(
-                epsilon, predicted_returns_q[-1]))
+        if control:
+            predicted_returns_v.append(
+                adaptive_time.utils.v_from_eps_greedy_q(
+                    epsilon, predicted_returns_q[-1]))
+        else:
+            first_action = trajectory[0][1]
+            first_action_counts[first_action] += 1
+            assert np.sum(first_action_counts) == num_episode[-1]
+            v_est = np.dot(
+                first_action_counts, predicted_returns_q[-1]) / num_episode[-1]
+            predicted_returns_v.append(v_est)
     
     # The following variant produces plots where we can see
     # the effect of the last update.
@@ -266,6 +281,7 @@ def run_generic(config_dict, samplers_tried):
     tau = config_dict.pop("tau")
     weights_to_evaluate = config_dict.pop("weights_to_evaluate")
     policy_to_evaluate = config_dict.pop("policy_to_evaluate")
+    do_weighing = config_dict.pop("do_weighing")
     if config_dict:
         raise ValueError(f"Unknown additional configs:\n{config_dict}")
     
@@ -302,7 +318,8 @@ def run_generic(config_dict, samplers_tried):
         results[name] = Parallel(n_jobs = num_runs)(
             delayed(run_experiment)(
                 seed+run, env, phi, sampler, epsilon, budget, budget_type,
-                termination_prob, max_env_steps, gamma=gamma,
+                termination_prob, max_env_steps, do_weighing=do_weighing,
+                gamma=gamma,
                 file_postfix=name + "_" + date_postfix,
                 tqdm=None, print_trajectory=False, save_threshold=save_limit,
                 weights_to_evaluate=weights_to_evaluate,

@@ -27,7 +27,7 @@ def phi_sa(phi_x, a, prev_phi_sa=None):
 
 def ols_monte_carlo(
         trajectory, sampler: samplers.Sampler2, tqdm,
-        phi, weights, targets, features, x0, gamma = 0.999):
+        phi, weights, targets, features, x0, do_weighing, gamma = 0.999):
     """Processes a trajectory to update the weights using OLS Monte Carlo.
     
     Args:
@@ -39,6 +39,8 @@ def ols_monte_carlo(
     - targets: previous targets, will be updated with data from the new trajectory
     - features: previous features, will be updated with data from the new trajectory
     - x0: the initial state (used only for reporting)
+    - do_weighing: whether to weigh updates according to the associated length of the
+        pivots they use.
     - gamma: the discount factor
     """
     
@@ -77,6 +79,8 @@ def ols_monte_carlo(
             else:
                 dt = prev_pivot - t
                 prev_pivot = t
+            if not do_weighing:
+                dt = 1
             features += dt * np.outer(x_sa_flat, x_sa_flat)
             targets += dt * G * x_sa_flat
         else:

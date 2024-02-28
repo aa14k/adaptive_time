@@ -16,6 +16,8 @@ def run_control():
         "epsilon": 0.00,
         "gamma": 0.99999,
 
+        "do_weighing": True,   # Of the updates. Normally True.
+
         "budget": 20_000,
         "budget_type": run_lib.BudgetType.UPDATES,
         # "budget": 10_000,
@@ -38,6 +40,8 @@ def run_control():
             "/Users/szepi1991/Code/adaptive_time/policy_to_eval_bad.npy",
             0.5  # What prob to use the good policy.
         ),
+
+        # "use_joblib": True,  # Whether to use joblib for parallelization.
 
         # The features cannot be set through a config for now.
         # They are defined in run_lib.py
