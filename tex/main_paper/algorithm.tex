@@ -35,12 +35,14 @@ In this section, we detail both a uniform and adaptive method for discretizing t
         \caption{\textsc{Uniform}}\label{alg:uniform}
         \begin{algorithmic}
         \State \textbf{Input:} Integers $N,M$.
-        \State $idxes = []$, $idx = 0$ and $i=0$
-        \While{$idx < N-1$}
+        \State $idxes = []$, $idx = 0$ and $i=1$
+        \State $idxes$.append$(1)$
+        \While{$idx < N$}
         \State $idx = i * M$
         \State $idxes.$append$(i * M)$
         \State $i = i + 1$
         \EndWhile
+        \State $idxes$.append$(N)$
         \State \Return $idxes$.
         \end{algorithmic}
         \end{algorithm}
