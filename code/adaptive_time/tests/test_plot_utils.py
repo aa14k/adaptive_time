@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
                 {"x": [0, 3, 6], "y": [1, 4, 7]},
             ]
         }
-        all_x_values, interpolated = plot_utils.interpolate_and_stack(
+        proc_data =  plot_utils.process_across_runs(
                 dict_of_multiple_runs, "x", "y", right=0)
         expected_all_x_values = np.array([0, 1, 2, 3, 4, 5, 6])
         expected_interpolated = {
@@ -53,11 +53,14 @@ class Test(unittest.TestCase):
                     [1, 2, 3, 4, 5, 6, 7],
                 ])
         }
-        np.testing.assert_array_equal(
-            all_x_values, expected_all_x_values)
-        self.assertEqual(
-            interpolated.keys(), expected_interpolated.keys())
 
-        for k in interpolated.keys():
+        self.assertEqual(proc_data.num_runs, 2)
+        self.assertEqual(proc_data.num_methods, 2)
+        np.testing.assert_array_equal(
+            proc_data.xs, expected_all_x_values)
+        self.assertEqual(
+            proc_data.all_runs_data.keys(), expected_interpolated.keys())
+
+        for k in proc_data.all_runs_data.keys():
             np.testing.assert_array_equal(
-                interpolated[k], expected_interpolated[k])
+                proc_data.all_runs_data[k], expected_interpolated[k])

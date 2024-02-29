@@ -47,4 +47,4 @@ jobs:
         echo `ls`
         cd "code"
         echo `ls`
-        python -m unittest adaptive_time/tests/*.py
+        python -m unittest **/tests/test_*.py

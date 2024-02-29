@@ -1,4 +1,4 @@
--e git+https://github.com/aa14k/adaptive_time.git@510e06d781a95c661a350e37ca946d21114709a5#egg=adaptive_time&subdirectory=code
+-e git+https://github.com/aa14k/adaptive_time.git@26515a190324301b81a11881c32d624ac6dba82c#egg=adaptive_time&subdirectory=code
 anyio==4.2.0
 appnope==0.1.4
 argon2-cffi==23.1.0
@@ -74,6 +74,7 @@ numpy==1.26.4
 overrides==7.7.0
 packaging==23.2
 pandocfilters==1.5.1
+parameterized==0.9.0
 parso==0.8.3
 pathspec==0.12.1
 pexpect==4.9.0
