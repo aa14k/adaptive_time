@@ -8,6 +8,7 @@ def run_control():
         # Save models that get more than this return:
         "save_limit": None,    # 40_000
 
+        # "termination_prob": 1.0/500.0,   # 1.0/500000.0
         "termination_prob": 1.0/10000.0,   # 1.0/500000.0
         "max_env_steps": None,  # Not supported due to truncation issues.
         "epsilon": 0.05,
@@ -15,13 +16,15 @@ def run_control():
 
         "do_weighing": True,   # Of the updates. Normally True.
 
-        "budget": 1_000,
+        "budget": 2_000,
+        # "budget": 10_000,
         "budget_type": run_lib.BudgetType.UPDATES,
         # "budget": 10_000,
         # "budget_type": BudgetType.INTERACTIONS,
 
-        "num_runs": 2,  # Number of runs for each configuration.
-        "tau": 0.002,   # The stepTime of the environment.
+        "num_runs": 8,  # Number of runs for each configuration.
+        # "tau": 0.002,   # The stepTime of the environment.
+        "tau": 0.02,   # The stepTime of the environment.
 
         # If None, we do control. Otherwise, we evaluate these weights/actions.
         "weights_to_evaluate": None,  
