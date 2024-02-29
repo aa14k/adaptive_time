@@ -18,12 +18,12 @@ def run_control():
 
         "do_weighing": True,   # Of the updates. Normally True.
 
-        "budget": 20_000,
+        "budget": 50_000,
         "budget_type": run_lib.BudgetType.UPDATES,
         # "budget": 10_000,
         # "budget_type": BudgetType.INTERACTIONS,
 
-        "num_runs": 2,  # Number of runs for each configuration.
+        "num_runs": 5,  # Number of runs for each configuration.
         "tau": 0.02,   # The stepTime of the environment.
 
         # We may evaluate some fixed weights, or a sequence of actions.
