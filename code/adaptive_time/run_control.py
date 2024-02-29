@@ -16,13 +16,13 @@ def run_control():
 
         "do_weighing": True,   # Of the updates. Normally True.
 
-        "budget": 2_000,
-        # "budget": 10_000,
+        # "budget": 2_000,
+        "budget": 10_000,
         "budget_type": run_lib.BudgetType.UPDATES,
         # "budget": 10_000,
         # "budget_type": BudgetType.INTERACTIONS,
 
-        "num_runs": 8,  # Number of runs for each configuration.
+        "num_runs": 5,  # Number of runs for each configuration.
         # "tau": 0.002,   # The stepTime of the environment.
         "tau": 0.02,   # The stepTime of the environment.
 
@@ -40,12 +40,13 @@ def run_control():
     # sampler = samplers.AdaptiveQuadratureSampler2(tolerance=0.0)
 
     samplers_tried = dict(
-        q0_10=samplers.AdaptiveQuadratureSampler2(tolerance=10),
-        q0_5=samplers.AdaptiveQuadratureSampler2(tolerance=5),
-        q0_1=samplers.AdaptiveQuadratureSampler2(tolerance=1),
-        u5=samplers.UniformSampler2(5),
-        u10=samplers.UniformSampler2(10),
-        u20=samplers.UniformSampler2(20),
+        # q0_10=samplers.AdaptiveQuadratureSampler2(tolerance=10),
+        # q0_5=samplers.AdaptiveQuadratureSampler2(tolerance=5),
+        # q0_1=samplers.AdaptiveQuadratureSampler2(tolerance=1),
+        u1=samplers.UniformSampler2(1),
+        # u5=samplers.UniformSampler2(5),
+        # u10=samplers.UniformSampler2(10),
+        # u20=samplers.UniformSampler2(20),
     )
 
     run_lib.run_generic(config, samplers_tried)
