@@ -70,8 +70,12 @@ class Test(unittest.TestCase):
         np.testing.assert_almost_equal(probs, expected)
 
     @parameterized.expand([
-        ("/Users/t/adaptive_time/code/adaptive_time", "/Users/t/adaptive_time/"),
-        ("/Users/t/adaptive_time/", "/Users/t/adaptive_time/"),
+        ("/Users/t/adaptive_time/code/adaptive_time", "/Users/t/adaptive_time"),
+        ("/Users/t/adaptive_time/", "/Users/t/adaptive_time"),
     ])
     def test_find_root_directory(self, orig_path, expected):
         self.assertEqual(utils.find_root_directory(orig_path), expected)
+
+    def test_find_root_directory_bad(self):
+        path = "/Users/t/otherproject/code/bla/"
+        self.assertRaises(ValueError, utils.find_root_directory, path)

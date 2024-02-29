@@ -50,5 +50,6 @@ def run_control():
 
     run_lib.run_generic(config, samplers_tried)
 
+
 if __name__ == "__main__":
     run_control()

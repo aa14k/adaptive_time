@@ -3,24 +3,32 @@
 Implements the main programs for the adaptive time project.
 """
 
+import argparse
+import copy
+import pickle
+from datetime import datetime
+import enum
+import random
 
 import gymnasium as gym
-from adaptive_time.features import Fourier_Features
 import numpy as np
 from tqdm import tqdm
-
-import random
 from joblib import Parallel, delayed
 
 import adaptive_time.utils
+from adaptive_time.features import Fourier_Features
 from adaptive_time import environments
 from adaptive_time import mc2
 
-import pickle
-from datetime import datetime
 
-import copy
-import enum
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--exp_name",
+    type=str,
+    required=True,
+    help="The name for the experiment. This will be used to name the output directory.",
+)
 
 
 class BudgetType(enum.Enum):
@@ -264,7 +272,14 @@ def make_features():
 
 
 def run_generic(config_dict, samplers_tried):
-    adaptive_time.utils.set_root_directory()
+    args = parser.parse_args()
+
+    date_string = datetime.now().strftime("%Y%m%d-%H%M%S")
+    exp_name = adaptive_time.utils.slugify(args.exp_name)
+
+    adaptive_time.utils.set_directory_in_project(
+        f"exp_results/{date_string}_{exp_name}",
+        create_dirs=True)
 
     register_gym_envs()
     env = gym.make('CartPole-OURS-v0')
@@ -311,8 +326,6 @@ def run_generic(config_dict, samplers_tried):
             raise ValueError()
         policy_to_evaluate = (pol1, pol2, policy_to_evaluate[2])
 
-    date_postfix = datetime.now().strftime("%Y%m%d-%H%M%S")
-
     results = {}
     for name, sampler in tqdm(samplers_tried.items()):
         print(name, sampler)
@@ -322,7 +335,7 @@ def run_generic(config_dict, samplers_tried):
                 seed+run, env, phi, sampler, epsilon, budget, budget_type,
                 termination_prob, max_env_steps, do_weighing=do_weighing,
                 gamma=gamma,
-                file_postfix=name + "_" + date_postfix,
+                file_postfix=name + "_" + date_string,
                 tqdm=None, print_trajectory=False, save_threshold=save_limit,
                 weights_to_evaluate=weights_to_evaluate,
                 policy_to_evaluate=policy_to_evaluate)
@@ -332,8 +345,8 @@ def run_generic(config_dict, samplers_tried):
     print()
     print("DONE!")
 
-    print("Saving results...")
-    filename = f"tradeoff_results_{date_postfix}.pkl"
+    filename = f"exp_data.pkl"
+    print(f"Saving results to {filename}...")
     with open(filename, "wb") as f:
         pickle.dump({"results": results, "config": orig_config}, f)
     print("Saved results.")

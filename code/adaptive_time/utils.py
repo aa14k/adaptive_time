@@ -4,6 +4,9 @@ from typing import Dict, Optional, Tuple
 import os
 import numpy as np
 
+import unicodedata
+import re
+
 
 def parse_dict(d: Dict) -> SimpleNamespace:
     """
@@ -144,11 +147,41 @@ def approx_integrate(xs, tol, idxes):
 
 def find_root_directory(path: str) -> str:
     """Finds the subpath to the root dir of the project in `path`."""
-    return path[:path.find("adaptive_time") + len("adaptive_time")] + "/"
+    where = path.find("adaptive_time")
+    if where == -1:
+        raise ValueError(
+            f"Cannot find the root directory of the project in '{path}'.")
+    return path[:where + len("adaptive_time")]
 
 
-def set_root_directory():
-    """Changes the working directory to the root of the project."""
-    os.chdir(find_root_directory(os.getcwd()))
-    print("Changed working directory to", os.getcwd())
-    return os.getcwd()
+def set_directory_in_project(
+        rel_path: Optional[str] = None, create_dirs: bool = False) -> str:
+    """Changes the working dir to rel_path from the root of the project."""
+    path = find_root_directory(os.getcwd())
+    if rel_path is not None:
+        path = os.path.join(path, rel_path)
+    if create_dirs:
+        os.makedirs(path, exist_ok=True)
+    os.chdir(path)
+    new_dir = os.getcwd()
+    print("Changed working directory to", new_dir)
+    return new_dir
+
+
+def slugify(value, allow_unicode=False):
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+
+    This version taken from: https://stackoverflow.com/a/295466.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower())
+    return re.sub(r'[-\s]+', '-', value).strip('-_')
