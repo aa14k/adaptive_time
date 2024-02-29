@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from typing import Dict, Optional, Tuple
 
+import os
 import numpy as np
 
 
@@ -139,4 +140,15 @@ def approx_integrate(xs, tol, idxes):
             approx_integrate(xs[:,:c], tol / 2, idxes)
             + approx_integrate(xs[:,c:], tol / 2, idxes))
     return Q
-    
+
+
+def find_root_directory(path: str) -> str:
+    """Finds the subpath to the root dir of the project in `path`."""
+    return path[:path.find("adaptive_time") + len("adaptive_time")] + "/"
+
+
+def set_root_directory():
+    """Changes the working directory to the root of the project."""
+    os.chdir(find_root_directory(os.getcwd()))
+    print("Changed working directory to", os.getcwd())
+    return os.getcwd()

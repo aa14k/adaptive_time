@@ -15,6 +15,7 @@ logger.addHandler(c_handler)
 
 
 class Test(unittest.TestCase):
+
     def test_discounted_returns(self):
         traj = [(0, 0, 1, 0), (0, 0, 1, 0), (0, 0, 1, 0)]
         gamma = 0.9
@@ -67,3 +68,10 @@ class Test(unittest.TestCase):
         qs_ar = np.array(qs)
         probs = utils.v_from_eps_greedy_q(eps, qs_ar)
         np.testing.assert_almost_equal(probs, expected)
+
+    @parameterized.expand([
+        ("/Users/t/adaptive_time/code/adaptive_time", "/Users/t/adaptive_time/"),
+        ("/Users/t/adaptive_time/", "/Users/t/adaptive_time/"),
+    ])
+    def test_find_root_directory(self, orig_path, expected):
+        self.assertEqual(utils.find_root_directory(orig_path), expected)

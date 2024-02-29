@@ -264,6 +264,8 @@ def make_features():
 
 
 def run_generic(config_dict, samplers_tried):
+    adaptive_time.utils.set_root_directory()
+
     register_gym_envs()
     env = gym.make('CartPole-OURS-v0')
 
