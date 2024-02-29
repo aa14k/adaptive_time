@@ -185,3 +185,10 @@ def slugify(value, allow_unicode=False):
         value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s-]', '', value.lower())
     return re.sub(r'[-\s]+', '-', value).strip('-_')
+
+
+def get_abs_path(my_path: str) -> str:
+    if os.path.isabs(my_path):
+        return my_path
+    else:
+        return os.path.join(os.getcwd(), my_path)

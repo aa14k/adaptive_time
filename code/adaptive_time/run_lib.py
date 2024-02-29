@@ -277,9 +277,7 @@ def run_generic(config_dict, samplers_tried):
     date_string = datetime.now().strftime("%Y%m%d-%H%M%S")
     exp_name = adaptive_time.utils.slugify(args.exp_name)
 
-    adaptive_time.utils.set_directory_in_project(
-        f"exp_results/{date_string}_{exp_name}",
-        create_dirs=True)
+    adaptive_time.utils.set_directory_in_project()
 
     register_gym_envs()
     env = gym.make('CartPole-OURS-v0')
@@ -316,12 +314,14 @@ def run_generic(config_dict, samplers_tried):
         assert len(policy_to_evaluate) == 3
         if isinstance(policy_to_evaluate[0], str):
             # Load the policy from the given file.
-            pol1 = np.load(policy_to_evaluate[0])
+            pol1 = np.load(adaptive_time.utils.get_abs_path(
+                policy_to_evaluate[0]))
         else:
             raise ValueError()
         if isinstance(policy_to_evaluate[1], str):
             # Load the policy from the given file.
-            pol2 = np.load(policy_to_evaluate[1])
+            pol2 = np.load(adaptive_time.utils.get_abs_path(
+                policy_to_evaluate[1]))
         else:
             raise ValueError()
         policy_to_evaluate = (pol1, pol2, policy_to_evaluate[2])
@@ -345,10 +345,16 @@ def run_generic(config_dict, samplers_tried):
     print()
     print("DONE!")
 
+    adaptive_time.utils.set_directory_in_project(
+        f"exp_results/{date_string}_{exp_name}",
+        create_dirs=True)
+
     filename = f"exp_data.pkl"
     print(f"Saving results to {filename}...")
     with open(filename, "wb") as f:
         pickle.dump({"results": results, "config": orig_config}, f)
     print("Saved results.")
+
+    adaptive_time.utils.set_directory_in_project()
 
 

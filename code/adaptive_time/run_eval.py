@@ -38,8 +38,8 @@ def run_control():
         #    set to None to not do this.
         #    set to a string to load the sequence of actions from a file.
         "policy_to_evaluate": (
-            "/Users/szepi1991/Code/adaptive_time/policy_to_eval_good.npy",
-            "/Users/szepi1991/Code/adaptive_time/policy_to_eval_bad.npy",
+            "policy_to_eval_good.npy",
+            "policy_to_eval_bad.npy",
             0.5  # What prob to use the good policy.
         ),
 
