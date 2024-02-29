@@ -2,14 +2,24 @@
 In this section, we detail both a uniform and adaptive method for discretizing the trajectories when performing updates in Monte-Carlo policy iteration. In \cref{alg:mc}, we detail the variant of Monte-Carlo policy iteration that is trained using either a uniform or adaptive discretization scheme. Given a function that approximates the action-values, \cref{alg:mc} runs the $\varepsilon$-greedy policy induced by the current approximate action-value function and collects $N$ trajectories of, possibly varying, length $T_j$, where $j \in \{1,2,\dotsc,N\}$. If \cref{alg:uniform} is used to discretize the updates, then \cref{alg:mc} performs updates with using every $M$-th state-action-return tuple in the trajectory, i.e. for $t \in \{1,M,2M,\dotsc,T_j\}$ we use tuples $(S_t, A_t, G_t)$ in computing the updated parameter $\theta_i$. 
 
 The choice of $M$ in the uniform d
-% \begin{proposition}
-%     Given tolerance $\tau \geq 0$ and a real-valued list $xs$ of size $N$, \cref{alg:adaptive-quadrature} returns an approximate sum $Q$ that satisfies $|Q - \text{sum}(xs)| \leq \tau$.  
-% \end{proposition}
-% \begin{proof}
-%     This proof will follow by induction. Assume that $N < 3$. Then \cref{alg:adaptive-quadrature} returns $Q = \text{sum}(xs)$. Therefore $|Q - \text{sum}(xs)| = |\text{sum}(xs) - \text{sum}(xs)| = 0 \leq \tau$ for all $\tau \geq 0$. 
-    
-%     Now assume that for a fixed $N > 2$ and $\tau \geq 0$ it holds that $|Q - \text{sum}(xs)| \leq \tau$. 
-% \end{proof}
+
+
+\begin{proposition}
+    For any given tolerance $\tau \geq 0$ and a real-valued list $xs$ of size $N$, \cref{alg:adaptive-quadrature} returns an approximate sum $Q$ that satisfies $|Q - \text{sum}(xs)| \leq \tau$.  
+\end{proposition}
+\begin{proof}
+    The proof will follow by strong induction on the length of the list $N$. We will denote for convenience with $Q_N$ the value returned by the algorithm as an approximation of a sum of length $N$, which is in turn denoted as $\text{sum}_N(xs)$. \\
+    \textbf{Base case}: for $N=1$, it trivially holds that: $\text{sum}(xs)=xs[0]=Q_1$. Therefore $|Q - \text{sum}(xs)|=0\leq\tau$. \\
+    \textbf{Strong inductive step}: assume the proposition is true for any $n-1\leq N$, for an arbitrary $\overline{\tau}\geq0$. Consider $\tau=2\overline{\tau}$, then either $|Q_n - \text{sum}(xs)|\leq\tau$ or the recursive step is applied, yielding:
+    \begin{equation}
+        |Q_n - \text{sum}_n(xs)| = |Q_{\lfloor n / 2 \rfloor} + Q_{\lceil n / 2 \rceil} - \text{sum}_{\lfloor n / 2 \rfloor}(xs) - \text{sum}_{\lceil n / 2 \rceil}(xs)|.
+    \end{equation}
+    Note that for every $n>1$ it holds $\lceil n / 2 \rceil\leq n-1$, therefore:
+    \begin{equation}
+        |Q_n - \text{sum}_n(xs)| \leq |Q_{\lfloor n / 2 \rfloor} - \text{sum}_{\lfloor n / 2 \rfloor}(xs)| + |Q_{\lceil n / 2 \rceil} - \text{sum}_{\lceil n / 2 \rceil}(xs)|\leq \overline{\tau} + \overline{\tau} = \tau,
+    \end{equation}
+    which proves the statement for $N=n$.
+\end{proof}
 
 \begin{algorithm}[t]
     \caption{\textsc{Adaptive}}\label{alg:adaptive-quadrature}
