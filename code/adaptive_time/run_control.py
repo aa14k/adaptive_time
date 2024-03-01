@@ -27,8 +27,9 @@ def run_control():
         "tau": 0.02,   # The stepTime of the environment.
 
         # If None, we do control. Otherwise, we evaluate these weights/actions.
-        "weights_to_evaluate": None,  
-        "policy_to_evaluate": None,
+        "weights_to_evaluate": None,  # 0 -- will evaluate0 weights, "path", will load the weights from that path
+        "policy_to_evaluate": None, # tuple(path to store action sequence (good) , path to stored another action sequence (bad), p = value of probability to select between the policies.)
+        # job_lib is true by default and used to parallize
 
         # "use_joblib": True,  # Whether to use joblib for parallelization.
 
@@ -40,13 +41,14 @@ def run_control():
     # sampler = samplers.AdaptiveQuadratureSampler2(tolerance=0.0)
 
     samplers_tried = dict(
+        # larger tolerance is more coarse approximation for the return. 
         # q0_10=samplers.AdaptiveQuadratureSampler2(tolerance=10),
         # q0_5=samplers.AdaptiveQuadratureSampler2(tolerance=5),
         # q0_1=samplers.AdaptiveQuadratureSampler2(tolerance=1),
         u1=samplers.UniformSampler2(1),
         # u5=samplers.UniformSampler2(5),
         # u10=samplers.UniformSampler2(10),
-        # u20=samplers.UniformSampler2(20),
+        # u20=samplers.UniformSampler2(20), # how many steps to skip at each time. 
     )
 
     run_lib.run_generic(config, samplers_tried)
