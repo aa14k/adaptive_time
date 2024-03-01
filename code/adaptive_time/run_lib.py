@@ -163,6 +163,8 @@ def run_experiment(
     # SHOULD we do this each time we visit the initial state?
     first_action_counts = np.zeros(_NUM_ACTIONS)
 
+    all_weights = []
+    first_actions = []
     while remaining_steps() > 0:
         if maybe_switch_policy:
             if random.random() < 0.5:
@@ -199,6 +201,7 @@ def run_experiment(
         total_pivots.append(total_pivots[-1] + num_pivots)
         total_interactions.append(total_interactions[-1] + len(trajectory))
         num_episode.append(num_episode[-1] + 1)
+        all_weights.append(weights)
         
         # Store the empirical and predicted returns. For any episode, we may
         # or may not have empirical returns for both actions. When we don't have an
@@ -221,6 +224,7 @@ def run_experiment(
             v_est = np.dot(
                 first_action_counts, predicted_returns_q[-1]) / num_episode[-1]
             predicted_returns_v.append(v_est)
+            first_actions.append(first_action)
     
     # The following variant produces plots where we can see
     # the effect of the last update.
@@ -241,6 +245,8 @@ def run_experiment(
         "predicted_returns_q": predicted_returns_q,
         "returns_per_episode_v": returns_per_episode_v,
         "predicted_returns_v": predicted_returns_v,
+        "all_weights": all_weights,
+        "first_actions": first_actions,
     }
     
     # The following variant produces plots where we
