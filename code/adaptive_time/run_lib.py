@@ -67,7 +67,7 @@ class ActionIterator:
         self.idx += 1
         return action
 
-
+# Dhawal, generate a trajectory and update the weights
 def run_experiment(
         seed, env, phi, sampler, epsilon,
         budget, budget_type: BudgetType,
@@ -84,6 +84,7 @@ def run_experiment(
     if tqdm is None:
         tqdm_use = lambda x: x
 
+    # Comment this out for control and fixed env steps
     if max_env_steps is not None:
         raise ValueError("max_env_steps is not supported in this version.")
 
@@ -122,7 +123,8 @@ def run_experiment(
             return budget - total_pivots[-1]
         else:
             raise ValueError("Unknown budget type")
-
+    
+    # implement epsilon-greedy action sampling. 
     def policy(state, weights):
         """Returns the action to take, and maybe the prob of all actions"""
         if random.random() < epsilon:
@@ -154,7 +156,7 @@ def run_experiment(
         # Evaluate the given sequence of actions, not doing control.
         maybe_switch_policy = True
         control = False
-    else:
+    else: # puts in the current weights and contrusts a policy
         policy_to_use = lambda s: policy(state=s, weights=weights)
         control = True
 
@@ -166,12 +168,13 @@ def run_experiment(
     all_weights = []
     first_actions = []
     while remaining_steps() > 0:
+        # policy evalution not for control
         if maybe_switch_policy:
             if random.random() < 0.5:
                 policy_to_use = ActionIterator(policy_to_evaluate[0])
             else:
                 policy_to_use = ActionIterator(policy_to_evaluate[1])
-
+        # list, bool
         trajectory, early_term = environments.generate_trajectory(
                 env, policy=policy_to_use,
                 # env, policy=lambda s: policy(state=s, weights=weights),
@@ -189,6 +192,7 @@ def run_experiment(
                 # * o_ is the same as the next o.
                 print(f"* {idx:4d}: o: {o}\n\t --> action: {a}")
 
+        # comment out for max number of env steps
         assert early_term is False, "We should not terminate early in this experiment."
 
         # Do updates, record stats from the processed trajectory.

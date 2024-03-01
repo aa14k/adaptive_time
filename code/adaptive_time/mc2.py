@@ -20,6 +20,7 @@ def phi_sa(phi_x, a, prev_phi_sa=None):
         prev_phi_sa.fill(0)
         phi_sa = prev_phi_sa
     else:
+        # 2 is the number of actions, which is fixed for now
         phi_sa = np.zeros((2, phi_x.size))
     phi_sa[a] = phi_x
     return phi_sa
@@ -81,6 +82,7 @@ def ols_monte_carlo(
                 prev_pivot = t
             if not do_weighing:
                 dt = 1
+            # the scale is increasing over time, so we need to scale the features
             features += dt * np.outer(x_sa_flat, x_sa_flat)
             targets += dt * G * x_sa_flat
         else:
