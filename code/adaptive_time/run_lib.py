@@ -108,7 +108,7 @@ def run_experiment(
     observation, _ = env.reset(seed=seed)
     d = len(phi.get_fourier_feature(observation))
     assert d == phi.num_parameters
-    features = np.identity(2 * d)   # An estimate of A = xx^T
+    features = np.identity(2 * d) * 0   # An estimate of A = xx^T
     targets = np.zeros(2 * d)  # An estimate of b = xG
     weights = np.zeros(2 * d)   # The weights that approximate A^{-1} b
 
@@ -170,7 +170,7 @@ def run_experiment(
     while remaining_steps() > 0:
         # policy evalution not for control
         if maybe_switch_policy:
-            if random.random() < 0.5:
+            if random.random() < policy_to_evaluate[2]:
                 policy_to_use = ActionIterator(policy_to_evaluate[0])
             else:
                 policy_to_use = ActionIterator(policy_to_evaluate[1])
@@ -199,7 +199,7 @@ def run_experiment(
         (weights, targets, features, cur_avr_returns_q, cur_avr_returns_v,
          num_pivots) = mc2.ols_monte_carlo(
             trajectory, sampler, tqdm_use, phi, weights, targets,
-            features, x_0, do_weighing, gamma)
+            features, x_0, do_weighing, gamma, scale=num_episode[-1] + 1)
         
         # Update the stats.
         total_pivots.append(total_pivots[-1] + num_pivots)
@@ -270,9 +270,9 @@ def run_experiment(
 
 
 #     ============      Configure Features       ============
-def make_features():
+def make_features(order=4):
     phi = Fourier_Features()
-    phi.init_fourier_features(4,4)
+    phi.init_fourier_features(4, order)
     x_thres = 4.8
     theta_thres = 0.418
     phi.init_state_normalizers(

@@ -28,7 +28,7 @@ def phi_sa(phi_x, a, prev_phi_sa=None):
 
 def ols_monte_carlo(
         trajectory, sampler: samplers.Sampler2, tqdm,
-        phi, weights, targets, features, x0, do_weighing, gamma = 0.999):
+        phi, weights, targets, features, x0, do_weighing, gamma = 0.999, scale = 1.0):
     """Processes a trajectory to update the weights using OLS Monte Carlo.
     
     Args:
@@ -43,6 +43,7 @@ def ols_monte_carlo(
     - do_weighing: whether to weigh updates according to the associated length of the
         pivots they use.
     - gamma: the discount factor
+    - scale: the scaling factor for normalizing features and targets
     """
     
     N = len(trajectory)
@@ -57,6 +58,8 @@ def ols_monte_carlo(
     x_sa = np.zeros((2, phi.num_parameters))
     returns_a0 = []  # from x0 (the initial state), action 0
     returns_a1 = []  # from x0 (the initial state), action 1
+    features_dt = np.zeros(features.shape[0])
+    targets_dt = np.zeros(targets.shape[0])
     for t in tqdm(range(N-1,-1,-1)):
         state, action, reward, _ = trajectory[t]
         if t in pivots:
@@ -83,14 +86,29 @@ def ols_monte_carlo(
             if not do_weighing:
                 dt = 1
             # the scale is increasing over time, so we need to scale the features
-            features += dt * np.outer(x_sa_flat, x_sa_flat)
-            targets += dt * G * x_sa_flat
+            features_dt = features_dt + dt * np.outer(x_sa_flat, x_sa_flat) / len(pivots)# * np.eye(x_sa_flat.shape[0])
+            targets_dt = targets_dt + dt * G * x_sa_flat / len(pivots)
         else:
             prev_G = G
             G = gamma * G + reward
+    features = features + features_dt
+    targets = targets + targets_dt
 
     try:
-        weights = np.linalg.solve(features, targets)
+        print(np.min(x_sa_flat), np.max(x_sa_flat))
+        # weights = np.linalg.solve(features, targets)
+        (weights, _, rank, _) = np.linalg.lstsq(
+            features / scale,
+            targets / scale
+        )
+        print("-----")
+        # print(x_sa_flat.shape, features.shape, targets.shape)
+        # print(weights.shape)
+        print(rank)
+        print("feat: {} targ: {}".format(np.linalg.norm(features, ord=1), np.linalg.norm(targets, ord=1)))
+        print("param: {}".format(np.linalg.norm(weights)))
+        print("residual: {}".format(np.sum(features @ weights - targets) / scale))
+        # print(np.sum((features / scale) @ weights - (targets / scale)))
     except np.linalg.LinAlgError:
         print("Singular matrix in OLS. Using previous weights.")
     
