@@ -109,7 +109,7 @@ def run_experiment(
     observation, _ = env.reset(seed=seed)
     d = len(phi.get_fourier_feature(observation))
     assert d == phi.num_parameters
-    features = np.identity(2 * d) * 0   # An estimate of A = xx^T
+    features = np.identity(2 * d) * 0.   # An estimate of A = xx^T
     targets = np.zeros(2 * d)  # An estimate of b = xG
     weights = np.zeros(2 * d)   # The weights that approximate A^{-1} b
 
@@ -273,7 +273,7 @@ def run_experiment(
 
 
 #     ============      Configure Features       ============
-def make_features(order=4):
+def make_features(order):
     phi = Fourier_Features()
     phi.init_fourier_features(4, order)
     x_thres = 4.8
@@ -310,11 +310,13 @@ def run_generic(config_dict, samplers_tried):
     weights_to_evaluate = config_dict.pop("weights_to_evaluate")
     policy_to_evaluate = config_dict.pop("policy_to_evaluate")
     do_weighing = config_dict.pop("do_weighing")
+    fourier_order = config_dict.pop("fourier_order")
     if config_dict:
         raise ValueError(f"Unknown additional configs:\n{config_dict}")
     
     env.stepTime(tau)
-    phi = make_features()
+    phi = make_features(fourier_order)
+    print(f"phi.num_parameters: {phi.num_parameters}")
 
     if weights_to_evaluate is not None:
         if weights_to_evaluate == 0:
@@ -341,7 +343,9 @@ def run_generic(config_dict, samplers_tried):
 
     results = {}
     for name, sampler in tqdm(samplers_tried.items()):
-        print(name, sampler)
+        print()
+        print(f"============= Running variant {name} =============")
+        print()
         #results[name] = []
         results[name] = Parallel(n_jobs = num_runs)(
             delayed(run_experiment)(
@@ -354,6 +358,7 @@ def run_generic(config_dict, samplers_tried):
                 policy_to_evaluate=policy_to_evaluate)
                 for run in range(num_runs)
             )
+        print()
 
     print()
     print("DONE!")

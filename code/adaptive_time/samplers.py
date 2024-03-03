@@ -40,7 +40,7 @@ class UniformSampler2(Sampler2):
         self._spacing = spacing
 
     def pivots(self, trajectory) -> np.ndarray:
-        return np.arange(0, len(trajectory), self._spacing)
+        return np.arange(0, len(trajectory), self._spacing, np.int32)
 
 
 class Sampler(ABC):

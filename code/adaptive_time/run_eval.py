@@ -16,15 +16,18 @@ def run_control():
         "epsilon": 0.00,
         "gamma": 0.99999,
 
+        "fourier_order": 5,
         "do_weighing": True,   # Of the updates. Normally True.
 
         # "budget": 50_000,
         # "budget": 1_000,
-        "budget": 100_000,
-        # "budget": 500,
-        "budget_type": run_lib.BudgetType.UPDATES,
+        # "budget": 100_000,
+        # # "budget": 500,
+        # "budget_type": run_lib.BudgetType.UPDATES,
         # "budget": 10_000,
         # "budget_type": BudgetType.INTERACTIONS,
+        "budget": 2,
+        "budget_type": run_lib.BudgetType.EPISODES,
 
         # "num_runs": 5,  # Number of runs for each configuration.
         "num_runs": 1,  # Number of runs for each configuration.
@@ -55,13 +58,13 @@ def run_control():
     # sampler = samplers.AdaptiveQuadratureSampler2(tolerance=0.0)
 
     samplers_tried = dict(
-        # q0_10=samplers.AdaptiveQuadratureSampler2(tolerance=10),
-        # q0_5=samplers.AdaptiveQuadratureSampler2(tolerance=5),
-        # q0_1=samplers.AdaptiveQuadratureSampler2(tolerance=1),
-        # u5=samplers.UniformSampler2(5),
-        # u10=samplers.UniformSampler2(10),
-        # u20=samplers.UniformSampler2(20),
         u1=samplers.UniformSampler2(1),
+        u5=samplers.UniformSampler2(5),
+        u10=samplers.UniformSampler2(10),
+        u20=samplers.UniformSampler2(20),
+        q0_10=samplers.AdaptiveQuadratureSampler2(tolerance=10),
+        q0_5=samplers.AdaptiveQuadratureSampler2(tolerance=5),
+        q0_1=samplers.AdaptiveQuadratureSampler2(tolerance=1),
     )
 
     run_lib.run_generic(config, samplers_tried)

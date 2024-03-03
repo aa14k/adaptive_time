@@ -49,16 +49,20 @@ def ols_monte_carlo(
     - gamma: the discount factor
     - scale: the scaling factor for normalizing features and targets
     """
-    
+    print("-----")
+    reg_factor = 0. + 0.01 * (scale-1)
+
     N = len(trajectory)
     pivots = sampler.pivots(trajectory)
-    #print(f"Using {len(pivots)}/{N} samples.")
+    print(f"Using {len(pivots)}/{N} samples.")
+    print(f"  reg_factor={reg_factor}.")
 
     # Could optimize the below by iterating only over pivots,
     # and using the discounted returns from `all_returns` directly.
     all_returns = utils.discounted_returns(trajectory, gamma)
-    all_features = np.zeros((len(pivots), 2*phi.num_parameters))
+    all_pivot_features = np.zeros((len(pivots), 2*phi.num_parameters))
 
+    pivot_idx = -1  # Start with the last one, count down.
     prev_pivot = N-1
     G = 0
 
@@ -69,11 +73,13 @@ def ols_monte_carlo(
     features_dt = np.zeros(features.shape[0])
     targets_dt = np.zeros(targets.shape[0])
     all_dts = []
+
+
     for t in tqdm(range(N-1,-1,-1)):
         state, action, reward, _ = trajectory[t]
+        G = gamma * G + reward
         if t in pivots:
-            prev_G = G
-            G = gamma * G + reward
+            # Process the pivot.
             if G != all_returns[t]:
                 print(f"Error in G: {G} != {all_returns[t]}")
                 assert False
@@ -87,9 +93,9 @@ def ols_monte_carlo(
 
             x_sa = phi_sa(x, action, x_sa)
             x_sa_flat = x_sa.flatten()
-            all_features[t] = x_sa_flat
+            all_pivot_features[pivot_idx] = x_sa_flat
             if t == N-1:
-                dt = 1
+                dt = 1   # The weight for the last update.
             else:
                 dt = prev_pivot - t
                 prev_pivot = t
@@ -97,39 +103,43 @@ def ols_monte_carlo(
                 dt = 1
             all_dts.append(dt)
             # # the scale is increasing over time, so we need to scale the features
-            # features_dt = features_dt + dt * np.outer(x_sa_flat, x_sa_flat) / len(pivots)# * np.eye(x_sa_flat.shape[0])
-            # targets_dt = targets_dt + dt * G * x_sa_flat / len(pivots)
-            features_dt = features_dt + dt * np.outer(x_sa_flat, x_sa_flat)
-            targets_dt = targets_dt + dt * G * x_sa_flat
-        else:
-            prev_G = G
-            G = gamma * G + reward
-    features = features + features_dt
-    targets = targets + targets_dt/_TARGET_SCALAR
+            features_dt = (
+                features_dt + dt * np.outer(x_sa_flat, x_sa_flat) / len(pivots) # * np.eye(x_sa_flat.shape[0])
+                + np.identity(len(x_sa_flat)) * reg_factor)
+            targets_dt = targets_dt + dt * G * x_sa_flat / len(pivots)
+            # features_dt = features_dt + dt * np.outer(x_sa_flat, x_sa_flat)
+            # targets_dt = targets_dt + dt * G * x_sa_flat
+            pivot_idx -= 1
+
+    features = features_dt.copy()
+    targets = targets_dt.copy()/_TARGET_SCALAR
+    # features = features + features_dt
+    # targets = targets + targets_dt/_TARGET_SCALAR
 
     # print("dt's used: ", all_dts)
 
     try:
         # weights = np.linalg.solve(features / scale, targets / scale)
-        # (weights, _, rank, _) = np.linalg.lstsq(
-        #     features / scale,
-        #     targets / scale
-        # )
-        # weights = np.linalg.solve(features, targets)
         (weights, _, rank, _) = np.linalg.lstsq(
-            features,
-            targets
+            features / scale,
+            targets / scale
         )
-        # print("-----")
+        # weights = np.linalg.solve(features, targets)
+        # (weights, _, rank, _) = np.linalg.lstsq(
+        #     features,
+        #     targets
+        # )
         # print(np.min(x_sa_flat), np.max(x_sa_flat))
         # # print(x_sa_flat.shape, features.shape, targets.shape)
         # # print(weights.shape)
-        # print(rank)
+        print("rank:", rank)
         # print("feat: {} targ: {}".format(
         #     np.linalg.norm(features/scale, ord=1), np.linalg.norm(targets/scale, ord=1)))
         print("param: {}".format(np.linalg.norm(weights)))
-        # print("residual: {}".format(np.sum(features @ weights - targets) / scale))
-        print("residual: {}".format(np.sum(features @ weights - targets)))
+        # print("residual: {}".format(np.linalg(
+        #         (features @ weights - targets) / scale), ord=1))
+        print("residual: {}".format(np.linalg.norm(
+                features @ weights - targets), ord=1))
         # print(np.sum((features / scale) @ weights - (targets / scale)))
 
         weights *= _TARGET_SCALAR
@@ -137,8 +147,8 @@ def ols_monte_carlo(
         print("Singular matrix in OLS. Using previous weights.")
     
     # Sanity check on the quality of the weights.
-    _targets = all_returns[pivots]
-    errors = np.abs(all_features @ weights - _targets)
+    _targets = np.array(all_returns)[pivots]
+    errors = np.abs(all_pivot_features @ weights - _targets)
     print("Error in predictions (mean, max):", np.mean(errors), np.max(errors))
 
     est_return_qs = (np.nanmean(returns_a0), np.nanmean(returns_a1))
