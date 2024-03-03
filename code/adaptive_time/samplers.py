@@ -9,7 +9,8 @@ from adaptive_time import utils
 class Sampler2(ABC):
     """Samplers return a list of indices to do updates at."""
 
-    def pivots(self, trajectory) -> List[np.ndarray]:
+    def pivots(self, trajectory) -> np.ndarray:
+        """Returns an array of indices to do updates at."""
         pass
 
 
@@ -20,7 +21,7 @@ class AdaptiveQuadratureSampler2(Sampler2):
         super().__init__()
         self._tolerance = tolerance
     
-    def pivots(self, trajectory) -> List[np.ndarray]:
+    def pivots(self, trajectory) -> np.ndarray:
         N = len(trajectory)
         rewards = np.zeros((2, N))
         for idx, traj in enumerate(trajectory):
@@ -38,7 +39,7 @@ class UniformSampler2(Sampler2):
         super().__init__()
         self._spacing = spacing
 
-    def pivots(self, trajectory) -> List[np.ndarray]:
+    def pivots(self, trajectory) -> np.ndarray:
         return np.arange(0, len(trajectory), self._spacing)
 
 
