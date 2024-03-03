@@ -6,6 +6,10 @@ from adaptive_time import samplers
 from adaptive_time import utils
 
 
+# _TARGET_SCALAR = 1000.
+_TARGET_SCALAR = 1.
+
+
 def phi_sa(phi_x, a, prev_phi_sa=None):
     """Form the (state, action) feature, potentially reusing memory.
     
@@ -92,23 +96,26 @@ def ols_monte_carlo(
             prev_G = G
             G = gamma * G + reward
     features = features + features_dt
-    targets = targets + targets_dt
+    targets = targets + targets_dt/_TARGET_SCALAR
 
     try:
-        print(np.min(x_sa_flat), np.max(x_sa_flat))
-        # weights = np.linalg.solve(features, targets)
+        # weights = np.linalg.solve(features / scale, targets / scale)
         (weights, _, rank, _) = np.linalg.lstsq(
             features / scale,
             targets / scale
         )
-        print("-----")
-        # print(x_sa_flat.shape, features.shape, targets.shape)
-        # print(weights.shape)
-        print(rank)
-        print("feat: {} targ: {}".format(np.linalg.norm(features, ord=1), np.linalg.norm(targets, ord=1)))
+        # print("-----")
+        # print(np.min(x_sa_flat), np.max(x_sa_flat))
+        # # print(x_sa_flat.shape, features.shape, targets.shape)
+        # # print(weights.shape)
+        # print(rank)
+        # print("feat: {} targ: {}".format(
+        #     np.linalg.norm(features/scale, ord=1), np.linalg.norm(targets/scale, ord=1)))
         print("param: {}".format(np.linalg.norm(weights)))
         print("residual: {}".format(np.sum(features @ weights - targets) / scale))
         # print(np.sum((features / scale) @ weights - (targets / scale)))
+
+        weights *= _TARGET_SCALAR
     except np.linalg.LinAlgError:
         print("Singular matrix in OLS. Using previous weights.")
     
