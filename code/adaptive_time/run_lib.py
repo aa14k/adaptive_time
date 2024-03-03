@@ -34,6 +34,7 @@ parser.add_argument(
 class BudgetType(enum.Enum):
     INTERACTIONS = 1
     UPDATES = 2
+    EPISODES = 3
 
 
 _NUM_ACTIONS = 2
@@ -121,6 +122,8 @@ def run_experiment(
             return budget - total_interactions[-1]
         elif budget_type == BudgetType.UPDATES:
             return budget - total_pivots[-1]
+        elif budget_type == BudgetType.EPISODES:
+            return budget - num_episode[-1]
         else:
             raise ValueError("Unknown budget type")
     
