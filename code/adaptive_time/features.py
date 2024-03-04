@@ -103,7 +103,6 @@ class Fourier_Features(object):
     
     def normalize_state(self,state):
         return (state - self.min) / self.range
-        return (state - self.min) / self.range
     
     def init_fourier_features(self, state_dim, order):
         self.order_list = np.array(list(iters.product(np.arange(order+1), repeat=state_dim)))

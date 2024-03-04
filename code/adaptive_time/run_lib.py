@@ -276,7 +276,8 @@ def run_experiment(
 def make_features(order):
     phi = Fourier_Features()
     phi.init_fourier_features(4, order)
-    x_thres = 4.8
+    x_thres = 2.4
+    # x_thres = 4.8
     theta_thres = 0.418
     phi.init_state_normalizers(
         np.array([x_thres,2.0,theta_thres,1]),

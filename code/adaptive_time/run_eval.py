@@ -16,7 +16,7 @@ def run_control():
         "epsilon": 0.00,
         "gamma": 0.99999,
 
-        "fourier_order": 5,
+        "fourier_order": 4,
         "do_weighing": True,   # Of the updates. Normally True.
 
         # "budget": 50_000,
@@ -62,9 +62,9 @@ def run_control():
         u5=samplers.UniformSampler2(5),
         u10=samplers.UniformSampler2(10),
         u20=samplers.UniformSampler2(20),
-        q0_10=samplers.AdaptiveQuadratureSampler2(tolerance=10),
-        q0_5=samplers.AdaptiveQuadratureSampler2(tolerance=5),
-        q0_1=samplers.AdaptiveQuadratureSampler2(tolerance=1),
+        # q0_10=samplers.AdaptiveQuadratureSampler2(tolerance=10),
+        # q0_5=samplers.AdaptiveQuadratureSampler2(tolerance=5),
+        # q0_1=samplers.AdaptiveQuadratureSampler2(tolerance=1),
     )
 
     run_lib.run_generic(config, samplers_tried)

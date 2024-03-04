@@ -32,7 +32,7 @@ def phi_sa(phi_x, a, prev_phi_sa=None):
 
 def ols_monte_carlo(
         trajectory, sampler: samplers.Sampler2, tqdm,
-        phi, weights, targets, features, x0, do_weighing, gamma = 0.999, scale = 1.0):
+        phi, weights, targets, features, x0, do_weighing, gamma, scale = 1.0):
     """Processes a trajectory to update the weights using OLS Monte Carlo.
     
     Args:
@@ -104,12 +104,14 @@ def ols_monte_carlo(
             all_dts.append(dt)
             # # the scale is increasing over time, so we need to scale the features
             features_dt = (
-                features_dt + dt * np.outer(x_sa_flat, x_sa_flat) / len(pivots) # * np.eye(x_sa_flat.shape[0])
-                + np.identity(len(x_sa_flat)) * reg_factor)
+                features_dt + dt * np.outer(x_sa_flat, x_sa_flat) / len(pivots))
+    
             targets_dt = targets_dt + dt * G * x_sa_flat / len(pivots)
             # features_dt = features_dt + dt * np.outer(x_sa_flat, x_sa_flat)
             # targets_dt = targets_dt + dt * G * x_sa_flat
             pivot_idx -= 1
+
+    features_dt = features_dt + reg_factor * np.eye(features.shape[0])
 
     features = features_dt.copy()
     targets = targets_dt.copy()/_TARGET_SCALAR
@@ -120,15 +122,15 @@ def ols_monte_carlo(
 
     try:
         # weights = np.linalg.solve(features / scale, targets / scale)
-        (weights, _, rank, _) = np.linalg.lstsq(
-            features / scale,
-            targets / scale
-        )
-        # weights = np.linalg.solve(features, targets)
         # (weights, _, rank, _) = np.linalg.lstsq(
-        #     features,
-        #     targets
+        #     features / scale,
+        #     targets / scale
         # )
+        # weights = np.linalg.solve(features, targets)
+        (weights, _, rank, _) = np.linalg.lstsq(
+            features,
+            targets
+        )
         # print(np.min(x_sa_flat), np.max(x_sa_flat))
         # # print(x_sa_flat.shape, features.shape, targets.shape)
         # # print(weights.shape)
