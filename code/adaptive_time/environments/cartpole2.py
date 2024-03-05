@@ -157,7 +157,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             [
                 self.x_threshold * 2,
                 np.finfo(np.float32).max,
-                self.theta_threshold_radians * 2,
+                self.theta_threshold_radians * 2,  # TODO this is not true anymore
                 np.finfo(np.float32).max,
             ],
             dtype=np.float32,
