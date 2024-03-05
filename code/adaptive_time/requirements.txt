@@ -1,4 +1,4 @@
--e git+https://github.com/aa14k/adaptive_time.git@e0fb0ab2163e6fc9695f44350c0b6fd84b303d4e#egg=adaptive_time&subdirectory=code
+-e git+https://github.com/aa14k/adaptive_time.git@8a68a8deb1e81eb3d43cd64a98e5a086f827fa76#egg=adaptive_time&subdirectory=code
 anyio==4.2.0
 appnope==0.1.4
 argon2-cffi==23.1.0
@@ -34,7 +34,7 @@ httpcore==1.0.3
 httpx==0.26.0
 idna==3.6
 iniconfig==2.0.0
-ipykernel==6.29.2
+ipykernel==6.29.3
 ipython==8.21.0
 ipywidgets==8.1.2
 isoduration==20.11.0
