@@ -57,21 +57,18 @@ class UniformlySpacedIntegrator(AproxIntegrator):
         # print("N", N)
         # print("spacing_pivots", spacing_pivots)
         # We ensure we include the last data point.
-        if spacing_pivots[-1] != N-1:
-            spacing_pivots = np.append(spacing_pivots, N-1)
+        if spacing_pivots[-1] != N:
+            spacing_pivots = np.append(spacing_pivots, N)
         # print("spacing_pivots", spacing_pivots)
     
         integral = 0
         used_idxes = {}
-        for idx_into_pivots in range(len(spacing_pivots)):
-            idx_range = spacing_pivots[idx_into_pivots:idx_into_pivots+2].copy()
-            if len(idx_range) > 1:
-                idx_range[1] -= 1
-                # if idx_range[0] == idx_range[1]:
-                #     idx_range = idx_range[0:1]  # A single item, as an array.
-            # print(f" * part idx[{idx_range[0]}:{idx_range[-1]}]:")
+        for idx_into_pivots in range(len(spacing_pivots)-1):
+            idx_low = spacing_pivots[idx_into_pivots]
+            idx_high = spacing_pivots[idx_into_pivots+1]
+            # print(f" * part idx[{idx_low}:{idx_high}]:")
             integral_part = _trapezoid_approx(
-                rewards_with_idxs[:, idx_range[0]:idx_range[-1]],
+                rewards_with_idxs[:, idx_low:idx_high],
                 used_idxes)
             # print(f"      -> {integral_part}")
             integral += integral_part

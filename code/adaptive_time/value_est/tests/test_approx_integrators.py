@@ -35,6 +35,7 @@ class TestIntegrators(unittest.TestCase):
     def test_unif_integrators_precise(self):
         """Ensure we can run them, finding the true integral."""
         rewards = [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 4, 4, 4, 4]
+        print(np.array([rewards, np.arange(len(rewards))]))
         true_integral = sum(rewards)
 
         uniform = approx_integrators.UniformlySpacedIntegrator(1)
@@ -52,14 +53,29 @@ class TestIntegrators(unittest.TestCase):
         self.assertLessEqual(abs(quad_integral - true_integral), tol)
         print(f"quad_pivots (num={len(quad_pivots)}/{len(rewards)}): {quad_pivots}")
 
-    def test_uniform2(self):
+    def test_uniform2_odd(self):
         """Make sure sampling every "second" point works decently.
         
         We actually see this is a little broken, we end up looking at each
         data point.
         """
         rewards = [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 4, 4, 4, 4]
-        print(rewards)
+        print(np.array([rewards, np.arange(len(rewards))]))
+        true_integral = sum(rewards)
+
+        unif = approx_integrators.UniformlySpacedIntegrator(2)
+        unif_integral, unif_pivots = unif.integrate(rewards)
+        print("approx, true integral: ", unif_integral, true_integral)
+        print(f"unif_pivots (num={len(unif_pivots)}/{len(rewards)}): {unif_pivots}")
+
+    def test_uniform2_even(self):
+        """Make sure sampling every "second" point works decently.
+        
+        We actually see this is a little broken, we end up looking at each
+        data point.
+        """
+        rewards = [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 4, 4, 4, 4, 4]
+        print(np.array([rewards, np.arange(len(rewards))]))
         true_integral = sum(rewards)
 
         unif = approx_integrators.UniformlySpacedIntegrator(2)
@@ -70,7 +86,7 @@ class TestIntegrators(unittest.TestCase):
     def test_uniform5(self):
         """Make sure sampling every "fifth" point works decently."""
         rewards = [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 4, 4, 4, 4]
-        print(rewards)
+        print(np.array([rewards, np.arange(len(rewards))]))
         true_integral = sum(rewards)
 
         unif = approx_integrators.UniformlySpacedIntegrator(5)
