@@ -20,5 +20,5 @@ python main.py --config_path=./configs/sarsa_tilecoding.json
 
 # Testing
 ```
-python -m unittest adaptive_time/tests/*.py
+python -m unittest **/tests/test_*.py
 ```
