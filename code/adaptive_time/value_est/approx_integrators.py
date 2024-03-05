@@ -43,7 +43,7 @@ class AdaptiveQuadratureIntegrator(AproxIntegrator):
             rewards, approx_integrate, self._tolerance)
 
 
-class UniformIntegrator(AproxIntegrator):
+class UniformlySpacedIntegrator(AproxIntegrator):
     """Returns uniformly spaced pivots."""
     def __init__(self, spacing: int) -> None:
         super().__init__()
@@ -55,23 +55,18 @@ class UniformIntegrator(AproxIntegrator):
         # TODO: this does not necessarily include the tail. Should we
         # for to include it?
         spacing_pivots = np.arange(0, N, self._spacing)
-        print("num_values: ", N)
-        print("spacing_pivots: ", spacing_pivots)
         integral = 0
         used_idxes = {}
         for idx_into_pivots in range(len(spacing_pivots)):
-            # print("first idx: ", spacing_pivots[idx_into_pivots])
             idx_range = spacing_pivots[idx_into_pivots:idx_into_pivots+2].copy()
-            # print("idx_range: ", idx_range.shape, idx_range)
             if len(idx_range) > 1:
                 idx_range[1] -= 1
                 if idx_range[0] == idx_range[1]:
                     idx_range = idx_range[0:1]  # A single item, as an array.
-            # print("idx_range: ", idx_range.shape, idx_range)
             integral_part = _trapezoid_approx(
                 rewards_with_idxs[:, idx_range],
                 used_idxes)
-            print("  ->  part idx", idx_range, f": {integral_part}")
+            # print("  ->  part idx", idx_range, f": {integral_part}")
             integral += integral_part
         pivots = list(sorted(used_idxes.keys()))
         return integral, np.array(pivots, dtype=np.int32)
@@ -100,7 +95,16 @@ def approx_integrate(xs, tol, idxes):
     # TODO: the current implementation is not very efficient, basically
     # everything is re-calculated twice.
     N = len(xs[0])
+    if N == 0:
+        return 0
+    elif N == 1:
+       idxes[int(xs[1,0])] = 1
+       return xs[0]
+    
+    # Otherwise we have at least two points and we can split the integral.
+    # TODO: this could be optimized, for 2 points we don't need to split.
     Q_est = _trapezoid_approx(xs, idxes)
+
     # Now find a one better approximation, and check if we're good enough.
     c = int(np.floor(N / 2))
     Q_better = (
@@ -122,7 +126,7 @@ def _trapezoid_approx(xs, idxes):
     
     Args:
     - xs ((2, N) array): the input data, contains the function values
-        and their corresponding indices.
+        and their corresponding indices. Should have length at least 1.
     - idxes (Dict): a dictionary to store the indices in that we used.
         Updated in place.
         
