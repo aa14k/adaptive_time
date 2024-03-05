@@ -3,7 +3,10 @@ This is a modified version of the Gymnasium CartPole environment.
 
 Changes:
 1. We don't terminate the episode if the pole angle is greater than ±12°.
-    (we still terminate if cart position is greater than ±2.4)
+    We also do not terminate if cart position is greater than ±2.4, though
+    we bound the state space to this range. (This is because we want to make
+    sure the agent experiences 0 rewards as well, but it's hard to do that if
+    the episode is terminated.)
 2. The state can be initialized with a custom state.
 3. There are two reward variants; the original, and one that slowly varies
     with the state. This is so that the reward function is not trivially
@@ -205,20 +208,19 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             theta_dot = theta_dot + self.tau * thetaacc
             theta = theta + self.tau * theta_dot
 
+        x = min(self.x_threshold, max(x, -self.x_threshold))
+
         self.state = (x, x_dot, theta, theta_dot)
 
-        # terminated = bool(
-        #     x < -self.x_threshold
-        #     or x > self.x_threshold
-        #     or theta < -self.theta_threshold_radians
-        #     or theta > self.theta_threshold_radians
-        # )
-        terminated = bool(
+        should_have_terminated = bool(
             x < -self.x_threshold
             or x > self.x_threshold
+            or theta < -self.theta_threshold_radians
+            or theta > self.theta_threshold_radians
         )
+        terminated = False
 
-        reward = self._reward_fn(self.state, terminated, self.steps_beyond_terminated)
+        reward = self._reward_fn(self.state, should_have_terminated)
 
         if not terminated:
             pass
@@ -269,19 +271,18 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         return np.array(self.state, dtype=np.float32), {}
 
 
-    def _discrete_reward(self, state, terminated, steps_beyond_terminated):
+    def _discrete_reward(
+            self, state, should_have_terminated):
         """The original."""
-        if not terminated:
-            return 1.0
-        elif steps_beyond_terminated is None:
-            # Pole just fell / we left the screen!
+        if not should_have_terminated:
             return 1.0
         else:
             return 0.0
 
 
-    def _continuous_reward(self, state, terminated, steps_beyond_terminated):
-        if not terminated:
+    def _continuous_reward(
+            self, state, should_have_terminated):
+        if not should_have_terminated:
             theta = state[2]
             if (theta < -self.theta_threshold_radians or
                 theta > self.theta_threshold_radians):
@@ -290,9 +291,6 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
                 return math.sqrt(
                     (self.theta_threshold_radians ** 2 - theta ** 2) 
                     / (self.theta_threshold_radians ** 2))
-        elif steps_beyond_terminated is None:
-            # We just left the screen!
-            return 0.0
         else:
             return 0.0
 

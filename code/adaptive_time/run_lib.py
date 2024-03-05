@@ -55,7 +55,8 @@ def reset_randomness(seed, env):
     random.seed(seed)
     np.random.seed(seed)
     # env.seed(seed)
-    env.action_space.seed(seed)    
+    if env:
+        env.action_space.seed(seed)    
 
 
 class ActionIterator:
