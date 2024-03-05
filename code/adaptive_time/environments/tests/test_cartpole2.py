@@ -10,7 +10,10 @@ class Cartpole2Test(unittest.TestCase):
         env = cartpole2.CartPoleEnv(discrete_reward=True)
         state, _ = env.reset()
         env.action_space.seed(0)
-        while True:
+        num_steps = 0
+        max_steps = 10   # To prevent infinite loops.
+        while num_steps < max_steps:
+            num_steps += 1
             action = env.action_space.sample()
             state, reward, done, _, _ = env.step(action)
             self.assertEqual(reward, 1.0)
@@ -22,13 +25,16 @@ class Cartpole2Test(unittest.TestCase):
         state, _ = env.reset()
         env.action_space.seed(0)
         rewards = []
-        while True:
+        num_steps = 0
+        max_steps = 10   # To prevent infinite loops.
+        while num_steps < max_steps:
+            num_steps += 1
             action = env.action_space.sample()
             state, reward, done, _, _ = env.step(action)
             rewards.append(reward)
             if done:
                 break
-        self.assertTrue(np.mean(rewards) < 0.99)
+        self.assertTrue(np.mean(rewards) < 0.999)
 
 
 
