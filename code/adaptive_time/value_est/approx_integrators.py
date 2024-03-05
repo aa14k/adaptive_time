@@ -52,21 +52,28 @@ class UniformlySpacedIntegrator(AproxIntegrator):
     def integrate(self, rewards) -> Tuple[float, np.ndarray]:
         N = len(rewards)
         rewards_with_idxs = np.array([rewards, np.arange(N)])
-        # TODO: this does not necessarily include the tail. Should we
-        # for to include it?
+
         spacing_pivots = np.arange(0, N, self._spacing)
+        # print("N", N)
+        # print("spacing_pivots", spacing_pivots)
+        # We ensure we include the last data point.
+        if spacing_pivots[-1] != N-1:
+            spacing_pivots = np.append(spacing_pivots, N-1)
+        # print("spacing_pivots", spacing_pivots)
+    
         integral = 0
         used_idxes = {}
         for idx_into_pivots in range(len(spacing_pivots)):
             idx_range = spacing_pivots[idx_into_pivots:idx_into_pivots+2].copy()
             if len(idx_range) > 1:
                 idx_range[1] -= 1
-                if idx_range[0] == idx_range[1]:
-                    idx_range = idx_range[0:1]  # A single item, as an array.
+                # if idx_range[0] == idx_range[1]:
+                #     idx_range = idx_range[0:1]  # A single item, as an array.
+            # print(f" * part idx[{idx_range[0]}:{idx_range[-1]}]:")
             integral_part = _trapezoid_approx(
-                rewards_with_idxs[:, idx_range],
+                rewards_with_idxs[:, idx_range[0]:idx_range[-1]],
                 used_idxes)
-            # print("  ->  part idx", idx_range, f": {integral_part}")
+            # print(f"      -> {integral_part}")
             integral += integral_part
         pivots = list(sorted(used_idxes.keys()))
         return integral, np.array(pivots, dtype=np.int32)
@@ -99,7 +106,7 @@ def approx_integrate(xs, tol, idxes):
         return 0
     elif N == 1:
        idxes[int(xs[1,0])] = 1
-       return xs[0]
+       return xs[0][0]
     
     # Otherwise we have at least two points and we can split the integral.
     # TODO: this could be optimized, for 2 points we don't need to split.
@@ -118,6 +125,7 @@ def approx_integrate(xs, tol, idxes):
         Q_est = (
             approx_integrate(xs[:,:c], tol / 2, idxes)
             + approx_integrate(xs[:,c:], tol / 2, idxes))
+        
     return Q_est
 
 
@@ -134,11 +142,15 @@ def _trapezoid_approx(xs, idxes):
     """
     N = len(xs[0])
 
+    if N == 0:
+        return 0
+    
+    # Update the idxes dictionary.
     idxes[int(xs[1,0])] = 1
     idxes[int(xs[1,-1])] = 1
 
     if N > 2:
-        Q = N * (xs[0,0] + xs[0,-1]) / 2        
+        Q = N * (xs[0,0] + xs[0,-1]) / 2.0
     else:
         Q = sum(xs[0])
 

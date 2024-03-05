@@ -89,13 +89,13 @@ class TestIntegrators(unittest.TestCase):
 
     #     samplers_tried = dict(
     #         q100=approx_integrators.AdaptiveQuadratureIntegrator(tolerance=100),
-    #         # q10=approx_integrators.AdaptiveQuadratureIntegrator(tolerance=10),
-    #         # q1=approx_integrators.AdaptiveQuadratureIntegrator(tolerance=1),
+    #         q10=approx_integrators.AdaptiveQuadratureIntegrator(tolerance=10),
+    #         q1=approx_integrators.AdaptiveQuadratureIntegrator(tolerance=1),
     #         u1=approx_integrators.UniformlySpacedIntegrator(1),
     #         u10=approx_integrators.UniformlySpacedIntegrator(10),
-    #         # u100=approx_integrators.UniformlySpacedIntegrator(100),
-    #         # u1000=approx_integrators.UniformlySpacedIntegrator(1000),
-    #         # u10000=approx_integrators.UniformlySpacedIntegrator(10000),
+    #         u100=approx_integrators.UniformlySpacedIntegrator(100),
+    #         u1000=approx_integrators.UniformlySpacedIntegrator(1000),
+    #         u10000=approx_integrators.UniformlySpacedIntegrator(10000),
     #     )
 
     #     approx_integrals = {}
@@ -103,11 +103,13 @@ class TestIntegrators(unittest.TestCase):
 
     #     for sampler_name, sampler in samplers_tried.items():
     #         print("sampler_name:", sampler_name)
-    #         for idx, reward_seq in enumerate(reward_sequences):
-    #             print("processing traj ", idx)
+    #         approx_integrals[sampler_name] = []
+    #         num_pivots[sampler_name] = []
+    #         for idx, reward_seq in enumerate(reward_sequences[:1]):
     #             integral, all_pivots = sampler.integrate(reward_seq)
-    #             approx_integrals[sampler_name] = integral
-    #             num_pivots[sampler_name] = len(all_pivots)
+    #             approx_integrals[sampler_name].append(integral)
+    #             num_pivots[sampler_name].append(len(all_pivots))
+    #     print(approx_integrals)
 
 
     @parameterized.expand([
