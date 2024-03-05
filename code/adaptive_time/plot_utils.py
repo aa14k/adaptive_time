@@ -98,9 +98,9 @@ def pad_combine(list_of_vecs, pad_value=np.nan):
     return np.stack(padded, axis=1)
 
 
-def plot_stuff(tuples_of_x_y_labels_kwargs, title, show):
+def plot_stuff(tuples_of_x_y_labels_kwargs, title, show, ax=None):
 
-    ax = plt.gca()
+    ax = plt.gca() if ax is None else ax
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
@@ -118,7 +118,7 @@ def plot_stuff(tuples_of_x_y_labels_kwargs, title, show):
 
 
 def default_plot_per_run_from_dict(
-        results: Dict, x_label, y_label, title=None, runs=None, show=True):
+        results: Dict, x_label, y_label, title=None, runs=None, show=True, ax=None):
     """Plot y vs x, potentially for a subset of the runs."""
     if runs is None:
         num_rums = len(next(iter(results.values())))
@@ -149,7 +149,7 @@ def default_plot_per_run_from_dict(
                  "alpha": 0.8}
             ))
 
-    ax = plot_stuff(tuples_of_x_y_labels_kwargs, title, False)
+    ax = plot_stuff(tuples_of_x_y_labels_kwargs, title, False, ax=ax)
     ax.set_ylabel(y_label, rotation=90, labelpad=5)
 
     ax.set_xlabel(x_label)
@@ -160,7 +160,7 @@ def default_plot_per_run_from_dict(
 
 def default_plot_per_run_from_procdata(
         proc_data: ProcData, x_plot_label, y_plot_label,
-        title=None, runs=None, show=True):
+        title=None, runs=None, show=True, ax=None):
     """Plot y vs x, potentially for a subset of the runs."""
     if runs is None:
         runs = list(range(proc_data.num_rums))
@@ -198,7 +198,7 @@ def default_plot_per_run_from_procdata(
                  "alpha": 0.8}
             ))
 
-    ax = plot_stuff(tuples_of_x_y_labels_kwargs, title, False)
+    ax = plot_stuff(tuples_of_x_y_labels_kwargs, title, False, ax=ax)
     ax.set_ylabel(y_plot_label, rotation=90, labelpad=5)
     ax.set_xlabel(x_plot_label)
 
@@ -208,7 +208,8 @@ def default_plot_per_run_from_procdata(
 
 
 def default_plot_mean_from_proc_data(
-        proc_data: ProcData, x_plot_label, y_plot_label, title=None, show=True):
+        proc_data: ProcData, x_plot_label, y_plot_label,
+        title=None, show=True, ax=None):
     """Plot mean y vs x."""
     if title is None:
         title = f"{y_plot_label} vs {x_plot_label}"
@@ -227,7 +228,7 @@ def default_plot_mean_from_proc_data(
             {"color": colors[i], "marker": "", "linestyle": "-"}
         ))
 
-    ax = plot_stuff(tuples_of_x_y_labels_kwargs, title, False)
+    ax = plot_stuff(tuples_of_x_y_labels_kwargs, title, False, ax=ax)
     ax.set_ylabel(y_plot_label, rotation=90, labelpad=5)
     ax.set_xlabel(x_plot_label)
     if show:
@@ -235,10 +236,9 @@ def default_plot_mean_from_proc_data(
     return ax
 
 
-
 def plot_with_error_bars(
         x_values, y_values, y_stds, label, color, ax, alpha=0.2, linestyle='-'):
-    """Plots the mean with error bars."""
+    """Plots the mean with error bars. UNTESTED?!"""
     ax.plot(x_values, y_values, label=label, color=color, linestyle=linestyle)
     ax.fill_between(
         x_values, y_values - y_stds, y_values + y_stds,

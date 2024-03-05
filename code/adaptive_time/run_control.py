@@ -15,6 +15,7 @@ def run_control():
         "gamma": 0.99999,
 
         "fourier_order": 4,
+        "regularizer": 0.1,
         "do_weighing": True,   # Of the updates. Normally True.
 
         # "budget": 2_000,

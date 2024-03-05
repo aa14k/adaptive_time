@@ -73,7 +73,7 @@ def run_experiment(
         seed, env, phi, sampler, epsilon,
         budget, budget_type: BudgetType,
         termination_prob, max_env_steps, do_weighing,
-        gamma, file_postfix, tqdm=None, print_trajectory=False,
+        gamma, regularizer, file_postfix, tqdm=None, print_trajectory=False,
         save_threshold=None,
         weights_to_evaluate=None, policy_to_evaluate=None):
     """Keeps interacting until the budget is (approximately) used up, returns stats.
@@ -103,13 +103,15 @@ def run_experiment(
     # The value.
     returns_per_episode_v = []
     predicted_returns_v = []
+    all_mean_err_pivots = []
+    all_max_err_pivots = []
 
     reset_randomness(seed, env)
 
     observation, _ = env.reset(seed=seed)
     d = len(phi.get_fourier_feature(observation))
     assert d == phi.num_parameters
-    features = np.identity(2 * d) * 0.   # An estimate of A = xx^T
+    features = np.identity(2 * d) * regularizer   # An estimate of A = xx^T
     targets = np.zeros(2 * d)  # An estimate of b = xG
     weights = np.zeros(2 * d)   # The weights that approximate A^{-1} b
 
@@ -128,7 +130,7 @@ def run_experiment(
             raise ValueError("Unknown budget type")
     
     # implement epsilon-greedy action sampling. 
-    def policy(state, weights):
+    def policy(state, pol_weights):
         """Returns the action to take, and maybe the prob of all actions"""
         if random.random() < epsilon:
             action = env.action_space.sample()
@@ -139,7 +141,7 @@ def run_experiment(
         qs = np.zeros(_NUM_ACTIONS)
         for action in range(_NUM_ACTIONS):
             x_sa = mc2.phi_sa(x, action)
-            qs[action] = np.inner(x_sa.flatten(), weights)
+            qs[action] = np.inner(x_sa.flatten(), pol_weights)
         # adaptive_time.utils.softmax(qs, 1)
         
         return adaptive_time.utils.argmax(qs)
@@ -153,14 +155,14 @@ def run_experiment(
     maybe_switch_policy = False
     if weights_to_evaluate is not None:
         # Evaluate the given weights, not doing control.
-        policy_to_use = lambda s: policy(state=s, weights=weights_to_evaluate)
+        policy_to_use = lambda s: policy(state=s, pol_weights=weights_to_evaluate)
         control = False
     elif policy_to_evaluate is not None:
         # Evaluate the given sequence of actions, not doing control.
         maybe_switch_policy = True
         control = False
     else: # puts in the current weights and contrusts a policy
-        policy_to_use = lambda s: policy(state=s, weights=weights)
+        policy_to_use = lambda s: policy(state=s, pol_weights=weights)
         control = True
 
     # For evaluation, we keep track of how many times we took
@@ -180,7 +182,7 @@ def run_experiment(
         # list, bool
         trajectory, early_term = environments.generate_trajectory(
                 env, policy=policy_to_use,
-                # env, policy=lambda s: policy(state=s, weights=weights),
+                # env, policy=lambda s: policy(state=s, pol_weights=weights),
                 termination_prob=termination_prob, max_steps=max_env_steps)
         
         # Process and record the return.
@@ -200,15 +202,17 @@ def run_experiment(
 
         # Do updates, record stats from the processed trajectory.
         (weights, targets, features, cur_avr_returns_q, cur_avr_returns_v,
-         num_pivots) = mc2.ols_monte_carlo(
+         num_pivots, mean_err_pivots, max_err_pivots) = mc2.ols_monte_carlo(
             trajectory, sampler, tqdm_use, phi, weights, targets,
-            features, x_0, do_weighing, gamma, scale=num_episode[-1] + 1)
+            features, x_0, do_weighing, gamma, ep_num=num_episode[-1] + 1)
         
         # Update the stats.
         total_pivots.append(total_pivots[-1] + num_pivots)
         total_interactions.append(total_interactions[-1] + len(trajectory))
         num_episode.append(num_episode[-1] + 1)
         all_weights.append(weights)
+        all_mean_err_pivots.append(mean_err_pivots)
+        all_max_err_pivots.append(max_err_pivots)
         
         # Store the empirical and predicted returns. For any episode, we may
         # or may not have empirical returns for both actions. When we don't have an
@@ -239,7 +243,7 @@ def run_experiment(
     if not maybe_switch_policy:
         trajectory, early_term = environments.generate_trajectory(
             env, policy=policy_to_use,
-            # env, policy=lambda s: policy(state=s, weights=weights),
+            # env, policy=lambda s: policy(state=s, pol_weights=weights),
             termination_prob=termination_prob, max_steps=max_env_steps)
         returns.append(sum(ts[2] for ts in trajectory))
 
@@ -254,6 +258,8 @@ def run_experiment(
         "predicted_returns_v": predicted_returns_v,
         "all_weights": all_weights,
         "first_actions": first_actions,
+        "all_mean_err_pivots": all_mean_err_pivots,
+        "all_max_err_pivots": all_max_err_pivots,
     }
     
     # The following variant produces plots where we
@@ -312,6 +318,7 @@ def run_generic(config_dict, samplers_tried):
     policy_to_evaluate = config_dict.pop("policy_to_evaluate")
     do_weighing = config_dict.pop("do_weighing")
     fourier_order = config_dict.pop("fourier_order")
+    regularizer = config_dict.pop("regularizer")
     if config_dict:
         raise ValueError(f"Unknown additional configs:\n{config_dict}")
     
@@ -352,7 +359,7 @@ def run_generic(config_dict, samplers_tried):
             delayed(run_experiment)(
                 seed+run, env, phi, sampler, epsilon, budget, budget_type,
                 termination_prob, max_env_steps, do_weighing=do_weighing,
-                gamma=gamma,
+                gamma=gamma, regularizer=regularizer,
                 file_postfix=name + "_" + date_string,
                 tqdm=None, print_trajectory=False, save_threshold=save_limit,
                 weights_to_evaluate=weights_to_evaluate,

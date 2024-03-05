@@ -13,21 +13,22 @@ def run_control():
         # We have to ensure that the policy we evaluate fails eventually!
         "termination_prob": 0,
         "max_env_steps": None,  # Not supported due to truncation issues.
-        "epsilon": 0.00,
+        "epsilon": 0.08,
         "gamma": 0.99999,
 
         "fourier_order": 4,
+        "regularizer": 0.1,
         "do_weighing": True,   # Of the updates. Normally True.
 
-        # "budget": 50_000,
+        "budget": 100_000,
         # "budget": 1_000,
         # "budget": 100_000,
         # # "budget": 500,
-        # "budget_type": run_lib.BudgetType.UPDATES,
+        "budget_type": run_lib.BudgetType.UPDATES,
         # "budget": 10_000,
         # "budget_type": BudgetType.INTERACTIONS,
-        "budget": 2,
-        "budget_type": run_lib.BudgetType.EPISODES,
+        # "budget": 2,
+        # "budget_type": run_lib.BudgetType.EPISODES,
 
         # "num_runs": 5,  # Number of runs for each configuration.
         "num_runs": 1,  # Number of runs for each configuration.
@@ -38,15 +39,11 @@ def run_control():
         #    set to None to not do this.
         #    set to a string to load the weights from a file.
         #    set to 0 to evaluate the 0 vector.
-        "weights_to_evaluate": None,
+        "weights_to_evaluate": 'cartpole_weights_20240227-102913_ret92516.44719752521.npy',
         # Option 2: Evaluate a sequence of actions.
         #    set to None to not do this.
         #    set to a string to load the sequence of actions from a file.
-        "policy_to_evaluate": (
-            "policy_to_eval_good.npy",
-            "policy_to_eval_bad.npy",
-            1.0  # What prob to use the good policy.
-        ),
+        "policy_to_evaluate": None,
 
         # "use_joblib": True,  # Whether to use joblib for parallelization.
 
@@ -59,9 +56,9 @@ def run_control():
 
     samplers_tried = dict(
         u1=samplers.UniformSampler2(1),
-        u5=samplers.UniformSampler2(5),
-        u10=samplers.UniformSampler2(10),
-        u20=samplers.UniformSampler2(20),
+        # u5=samplers.UniformSampler2(5),
+        # u10=samplers.UniformSampler2(10),
+        # u20=samplers.UniformSampler2(20),
         # q0_10=samplers.AdaptiveQuadratureSampler2(tolerance=10),
         # q0_5=samplers.AdaptiveQuadratureSampler2(tolerance=5),
         # q0_1=samplers.AdaptiveQuadratureSampler2(tolerance=1),
