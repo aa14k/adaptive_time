@@ -172,13 +172,13 @@ def adaptive_approx_integrate(xs, tol, idxes):
     # print("   -->   Q_est, Q_better, tol", Q_est, Q_better, tol)
     # print()
     if np.abs(Q_est - Q_better) > tol:
-        Q_est = (
+        Q_better = (
             adaptive_approx_integrate(xs[:,:c+1], tol / 2, idxes)
             + adaptive_approx_integrate(xs[:,c:], tol / 2, idxes)
             - xs[0,c]  # Remove the double-counted c.
         )
-        
-    return Q_est
+
+    return Q_better
 
 
 def approx_integrate_old(xs, tol, idxes):
