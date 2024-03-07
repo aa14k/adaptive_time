@@ -2,6 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=tex,python,jupyternotebooks
 
 .DS_Store
+results/
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
