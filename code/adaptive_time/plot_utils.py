@@ -208,32 +208,53 @@ def default_plot_per_run_from_procdata(
 
 
 def default_plot_mean_from_proc_data(
-        proc_data: ProcData, x_plot_label, y_plot_label, title=None, show=True):
+        proc_data: ProcData, x_plot_label, y_plot_label,
+        title=None, show=True, key_filter=None, add_stderr=False):
     """Plot mean y vs x."""
     if title is None:
         title = f"{y_plot_label} vs {x_plot_label}"
 
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-    if proc_data.num_methods > len(colors):
-        # NOTE this could just be a warning; feel free to change.
-        raise ValueError("Too many results to plot.")
+    # if proc_data.num_methods > len(colors):
+    #     # NOTE this could just be a warning; feel free to change.
+    #     raise ValueError("Too many results to plot.")
+
+    ax = plt.gca()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
     tuples_of_x_y_labels_kwargs = []
-    for i, (name, mean_returns) in enumerate(proc_data.means.items()):
-        tuples_of_x_y_labels_kwargs.append((
-            proc_data.xs, mean_returns, name,
-            # {"color": colors[i], "marker": ".",
-            #  "linestyle": "None", "markersize": 5, "alpha": 0.8}
-            {"color": colors[i], "marker": "", "linestyle": "-"}
-        ))
+    idx = 0
+    for name, mean_returns in proc_data.means.items():
+        if key_filter is not None and not key_filter(name):
+            continue
 
-    ax = plot_stuff(tuples_of_x_y_labels_kwargs, title, False)
+        color = colors[idx]
+        # kwargs = {
+        #     "color": color, "marker": ".",
+        #     "linestyle": "None", "markersize": 5, "alpha": 0.8
+        # }
+        kwargs = {"color": color, "marker": "", "linestyle": "-"}
+
+        ax.plot(proc_data.xs, mean_returns, label=name, **kwargs)
+        if add_stderr:
+            ax.fill_between(
+                proc_data.xs,
+                mean_returns - proc_data.stderrs[name],
+                mean_returns + proc_data.stderrs[name],
+                color=color, alpha=0.2)
+        idx += 1
+
     ax.set_ylabel(y_plot_label, rotation=90, labelpad=5)
     ax.set_xlabel(x_plot_label)
+    if title is not None:
+        plt.title(title)
+
+    plt.legend()
+
     if show:
         plt.show()
     return ax
-
 
 
 def plot_with_error_bars(
