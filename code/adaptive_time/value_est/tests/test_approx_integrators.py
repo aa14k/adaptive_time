@@ -23,7 +23,7 @@ class TestIntegrators(unittest.TestCase):
         rewards = [0, 0, 1, 2, 3, 4, 4, 4, 4, 4]
         true_integral = sum(rewards)
 
-        quad = approx_integrators.AdaptiveQuadratureIntegrator(0.0)
+        quad = approx_integrators.AdaptiveQuadratureIntegrator(0.0, print_debug=True)
         quad_integral, quad_pivots = quad.integrate(rewards)
         self.assertAlmostEqual(quad_integral, true_integral)
 
@@ -34,7 +34,7 @@ class TestIntegrators(unittest.TestCase):
         tol = 3.0   # A high tolerance so we don't have to use all data points.
         true_integral = sum(rewards)
 
-        quad = approx_integrators.AdaptiveQuadratureIntegrator(tol)
+        quad = approx_integrators.AdaptiveQuadratureIntegrator(tol, print_debug=True)
         quad_integral, quad_pivots = quad.integrate(rewards)
         self.assertLessEqual(abs(quad_integral - true_integral), tol)
         print(f"quad_pivots (num={len(quad_pivots)}/{len(rewards)}): {quad_pivots}")

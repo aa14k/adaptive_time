@@ -2,6 +2,7 @@ from abc import ABC, abstractclassmethod
 from typing import Any, List, Tuple
 
 import numpy as np
+import functools
 
 from adaptive_time import utils
 from adaptive_time import value_est
@@ -28,13 +29,16 @@ def _integrate_with_quadrature(rewards, quadrature_fn, tolerance):
 class AdaptiveQuadratureIntegrator(AproxIntegrator):
     """Identifies pivots using quadrature methods, access to total sum."""
 
-    def __init__(self, tolerance: float) -> None:
+    def __init__(self, tolerance: float, print_debug: bool = False) -> None:
         super().__init__()
         self._tolerance = tolerance
+        self.print_debug = print_debug
     
     def integrate(self, rewards) -> Tuple[float, np.ndarray]:
+        integrate_fn = functools.partial(
+            adaptive_approx_integrate, print_debug=self.print_debug)
         return _integrate_with_quadrature(
-            rewards, adaptive_approx_integrate, self._tolerance)
+            rewards, integrate_fn, self._tolerance)
 
 
 class AdaptiveQuadratureIntegratorOld(AproxIntegrator):
@@ -123,7 +127,7 @@ class UniformlySpacedIntegratorOld(AproxIntegrator):
         return integral, np.array(pivots, dtype=np.int32)
 
 
-def adaptive_approx_integrate(xs, tol, idxes):
+def adaptive_approx_integrate(xs, tol, idxes, print_debug=False):
     """Approximately integrate using the adaptive quadrature method.
     
     Approximates the integral of all `xs[0]`s, using the trapezoidal rule.
@@ -149,6 +153,9 @@ def adaptive_approx_integrate(xs, tol, idxes):
     if N == 0:
         return 0
     elif N <= 2:
+        if print_debug:
+            print()
+            print(f"  approx integrate; len={N}; base case for {xs[0]}")
         # Works for N=1 as well.
         idxes[int(xs[1,0])] = 1
         idxes[int(xs[1,-1])] = 1
@@ -167,14 +174,20 @@ def adaptive_approx_integrate(xs, tol, idxes):
         + _trapezoid_approx(xs[:,c:], idxes)  # Include c.
         - xs[0,c]  # Remove the double-counted c.
     )  # c was already added to the idxes in the _trapzoid_approx calls.
-    # print()
-    # print(xs)
-    # print("   -->   Q_est, Q_better, tol", Q_est, Q_better, tol)
-    # print()
-    if np.abs(Q_est - Q_better) > tol:
+    outside_tol = np.abs(Q_est - Q_better) > tol
+
+    if print_debug:
+        print()
+        print(f"  approx integrate; len={N}, "
+              f"s={xs[0,0]}, m={xs[0,c]}, e={xs[0,-1]}")
+        print(f"   -->   Q_est={Q_est}, Q_better={Q_better},"
+              f" error={np.abs(Q_est - Q_better)} "
+              f"> tol={tol} ? => Recurse? {outside_tol}")
+
+    if outside_tol:
         Q_better = (
-            adaptive_approx_integrate(xs[:,:c+1], tol / 2, idxes)
-            + adaptive_approx_integrate(xs[:,c:], tol / 2, idxes)
+            adaptive_approx_integrate(xs[:,:c+1], tol / 2, idxes, print_debug)
+            + adaptive_approx_integrate(xs[:,c:], tol / 2, idxes, print_debug)
             - xs[0,c]  # Remove the double-counted c.
         )
 
