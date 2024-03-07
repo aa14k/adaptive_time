@@ -3,12 +3,13 @@ import numpy as np
 import random
 
 
-# def reset_randomness(seed, env):
-#     """Resets all randomness, except for the environment's seed."""
-#     random.seed(seed)
-#     np.random.seed(seed)
-#     # env.seed(seed)
-#     env.action_space.seed(seed)    
+def reset_randomness(seed, env):
+    """Resets all randomness, except for the environment's seed."""
+    random.seed(seed)
+    np.random.seed(seed)
+    # env.seed(seed)
+    if env:
+        env.action_space.seed(seed)    
 
 
 def generate_trajectory(
@@ -64,3 +65,111 @@ def generate_trajectory(
     return trajectory, False
 
 
+def simulate_learning(
+        seed, samplers_tried, update_budget, num_runs,
+        start_state_weights, approx_integrals, num_pivots, tqdm):
+    """Simulates learning in an environment."""
+    reset_randomness(seed, env=None)
+
+    data = {}
+    num_trajs = len(start_state_weights)
+
+    if tqdm is None:
+        tqdm = lambda x: x
+
+    estimated_values_by_episode = {}
+    number_of_pivots_by_episode = {}
+    all_values_by_episode = {}
+
+    for sampler_name, sampler in tqdm(samplers_tried.items()):
+        print("sampler_name:", sampler_name)
+        data[sampler_name] = []
+
+        for run_idx in range(num_runs):
+            # Main idea: update the value estimate with new samples
+            # until we run out of budget.
+            used_updates = 0
+            value_estimate = 0
+            num_samples = 0
+            cur_data = {
+                "values_of_trajs": [],  # Instantaneous values.
+                "running_v_estimate": [],  # Running value estimates.
+                "total_pivots": [],  # Total pivots used for the estimate.
+            }
+
+            while used_updates < update_budget:
+                num_samples += 1
+                start_state = np.random.choice(num_trajs, p=start_state_weights)
+                val_sample = approx_integrals[sampler_name][start_state]
+                cur_data["values_of_trajs"].append(val_sample)
+                
+                value_estimate += (1.0/num_samples) * (val_sample - value_estimate)
+                used_updates += num_pivots[sampler_name][start_state]
+
+                cur_data["running_v_estimate"].append(value_estimate)
+                cur_data["total_pivots"].append(used_updates)
+            
+            data[sampler_name].append(cur_data)
+
+    return data
+
+
+def simulate_learning_orig(
+        seed, samplers_tried, update_budget, num_runs,
+        start_state_weights, approx_integrals, num_pivots, tqdm):
+    """Simulates learning in an environment."""
+    reset_randomness(seed, env=None)
+
+    num_trajs = len(start_state_weights)
+
+    if tqdm is None:
+        tqdm = lambda x: x
+
+    estimated_values_by_episode = {}
+    number_of_pivots_by_episode = {}
+    all_values_by_episode = {}
+
+    for sampler_name, sampler in tqdm(samplers_tried.items()):
+        print("sampler_name:", sampler_name)
+        # Update the value estimate with new samples until we run out of budget.
+        used_updates = 0
+        value_estimate = 0
+        num_samples = 0
+
+        all_values_by_episode[sampler_name] = []
+        # empirical_state_distr = np.zeros((num_trajs))
+
+        estimated_values_by_episode[sampler_name] = []
+        number_of_pivots_by_episode[sampler_name] = []
+
+        while used_updates < update_budget:
+            num_samples += 1
+            start_state = np.random.choice(num_trajs, p=start_state_weights)
+            # empirical_state_distr[start_state] += 1
+            val_sample = approx_integrals[sampler_name][start_state]
+            all_values_by_episode[sampler_name].append(val_sample)
+            
+            value_estimate += (1.0/num_samples) * (val_sample - value_estimate)
+            used_updates += num_pivots[sampler_name][start_state]
+
+            estimated_values_by_episode[sampler_name].append(value_estimate)
+            number_of_pivots_by_episode[sampler_name].append(used_updates)
+        
+        # empirical_state_distr /= np.sum(empirical_state_distr)
+        # empirical_value = approx_integrals[sampler_name] @ empirical_state_distr
+
+
+    # CODE TO SAMPLE MANY TRAJECOTRIES TO FIND AN EMPIRICAL DISTRIBUTION 
+    # episode_samples = 100_000
+    # sampled_start_states = np.random.choice(num_trajs, size=(episode_samples,), p=weights)
+    # # We now have samples, we determine the empirical state distribution.
+    # empirical_state_distr = np.zeros((num_trajs))
+    # values, counts = np.unique(sampled_start_states, return_counts=True)
+    # empirical_state_distr[values] = counts
+    # empirical_state_distr /= np.sum(empirical_state_distr)
+
+    return (
+        estimated_values_by_episode,
+        number_of_pivots_by_episode,
+        all_values_by_episode
+    )
