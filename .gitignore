@@ -3,6 +3,8 @@
 
 .DS_Store
 results/
+.tmp_config_ipynb
+code/adaptive_time/notebooks/value_estimation.html
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
