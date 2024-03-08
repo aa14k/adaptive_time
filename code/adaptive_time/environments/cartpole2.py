@@ -300,7 +300,8 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
     def _discrete_reward(self, state):
         """The original."""
-        if not self.should_have_terminated:
+        if not self.should_have_terminated or self._terminating_variant:
+            # In the terminating variant, every single step is reward=1.
             return 1.0
         else:
             return 0.0
