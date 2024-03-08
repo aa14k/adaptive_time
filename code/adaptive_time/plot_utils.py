@@ -215,6 +215,7 @@ def default_plot_mean_from_proc_data(
         title = f"{y_plot_label} vs {x_plot_label}"
 
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+    max_cols = len(colors)
     # if proc_data.num_methods > len(colors):
     #     # NOTE this could just be a warning; feel free to change.
     #     raise ValueError("Too many results to plot.")
@@ -229,7 +230,7 @@ def default_plot_mean_from_proc_data(
         if key_filter is not None and not key_filter(name):
             continue
 
-        color = colors[idx]
+        color = colors[idx % max_cols]
         # kwargs = {
         #     "color": color, "marker": ".",
         #     "linestyle": "None", "markersize": 5, "alpha": 0.8
@@ -242,7 +243,7 @@ def default_plot_mean_from_proc_data(
                 proc_data.xs,
                 mean_returns - proc_data.stderrs[name],
                 mean_returns + proc_data.stderrs[name],
-                color=color, alpha=0.2)
+                color=color, alpha=0.1)
         idx += 1
 
     ax.set_ylabel(y_plot_label, rotation=90, labelpad=5)

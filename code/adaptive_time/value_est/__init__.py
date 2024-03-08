@@ -77,20 +77,16 @@ def simulate_learning(
     if tqdm is None:
         tqdm = lambda x: x
 
-    estimated_values_by_episode = {}
-    number_of_pivots_by_episode = {}
-    all_values_by_episode = {}
-
     for sampler_name, sampler in tqdm(samplers_tried.items()):
         print("sampler_name:", sampler_name)
         data[sampler_name] = []
 
-        for run_idx in range(num_runs):
+        for run_idx in tqdm(range(num_runs)):
             # Main idea: update the value estimate with new samples
             # until we run out of budget.
             used_updates = 0
             value_estimate = 0
-            num_samples = 0
+            num_traj_samples = 0
             cur_data = {
                 "values_of_trajs": [],  # Instantaneous values.
                 "running_v_estimate": [],  # Running value estimates.
@@ -98,12 +94,12 @@ def simulate_learning(
             }
 
             while used_updates < update_budget:
-                num_samples += 1
+                num_traj_samples += 1
                 start_state = np.random.choice(num_trajs, p=start_state_weights)
                 val_sample = approx_integrals[sampler_name][start_state]
                 cur_data["values_of_trajs"].append(val_sample)
                 
-                value_estimate += (1.0/num_samples) * (val_sample - value_estimate)
+                value_estimate += (1.0/num_traj_samples) * (val_sample - value_estimate)
                 used_updates += num_pivots[sampler_name][start_state]
 
                 cur_data["running_v_estimate"].append(value_estimate)

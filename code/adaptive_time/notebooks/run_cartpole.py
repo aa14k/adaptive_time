@@ -20,10 +20,10 @@ def main(argv):
     base_config = {
         "generate_new_data": False,
         "save_new_data": True,
-        # "generate_new_data": True,
-        # "save_new_data": True,
         "num_runs": 30,
-        "sample_budget": 1_000_000,
+        # "num_runs": 30,
+        "sample_budget": 2_000_000,
+        # "sample_budget": 1_000,
         "discrete_reward": True,
         "terminate_env": True,
     }
@@ -33,10 +33,16 @@ def main(argv):
 
     # Dynamic settings.
     search_configs = []
-    for a in itertools.product([False, True],repeat=2):
-        config = {"discrete_reward": a[0], "terminate_env": a[1]}
-        search_configs.append(config)
+    # for a in itertools.product([False, True],repeat=2):
+    #     config = {"discrete_reward": a[0], "terminate_env": a[1]}
+    #     search_configs.append(config)
+    search_configs.append({"discrete_reward": True, "terminate_env": True})
+    search_configs.append({"discrete_reward": True, "terminate_env": False})
+    search_configs.append({"discrete_reward": False, "terminate_env": False})
     # search_configs = [{}]
+
+    if not search_configs:
+        search_configs = [{}]
 
     for config in tqdm(search_configs):
         cc = copy.deepcopy(base_config)
