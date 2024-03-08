@@ -135,7 +135,12 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         "render_fps": 50,
     }
 
-    def __init__(self, discrete_reward: bool, render_mode: Optional[str] = None):
+    def __init__(
+            self,
+            discrete_reward: bool,
+            should_terminate: bool,
+            step_time: float = 0.02,
+            render_mode: Optional[str] = None):
         self.gravity = 9.8
         self.masscart = 1.0
         self.masspole = 0.1
@@ -143,13 +148,15 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.length = 0.5  # actually half the pole's length
         self.polemass_length = self.masspole * self.length
         self.force_mag = 10.0
-        self.tau = 0.02  # seconds between state updates
+        self.tau = step_time  # seconds between state updates
         self.kinematics_integrator = "euler"
 
         if discrete_reward:
             self._reward_fn = self._discrete_reward
         else:
             self._reward_fn = self._continuous_reward
+
+        self._terminating_variant = should_terminate
 
         # Angle at which to fail the episode
         self.theta_threshold_radians = 12 * 2 * math.pi / 360
@@ -186,52 +193,58 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             action
         ), f"{action!r} ({type(action)}) invalid"
         assert self.state is not None, "Call reset before using step method."
-        x, x_dot, theta, theta_dot = self.state
-        force = self.force_mag if action == 1 else -self.force_mag
-        costheta = math.cos(theta)
-        sintheta = math.sin(theta)
-
-        # For the interested reader:
-        # https://coneural.org/florian/papers/05_cart_pole.pdf
-        temp = (
-            force + self.polemass_length * theta_dot**2 * sintheta
-        ) / self.total_mass
-        thetaacc = (self.gravity * sintheta - costheta * temp) / (
-            self.length * (4.0 / 3.0 - self.masspole * costheta**2 / self.total_mass)
-        )
-        xacc = temp - self.polemass_length * thetaacc * costheta / self.total_mass
-
-        if self.kinematics_integrator == "euler":
-            x = x + self.tau * x_dot
-            x_dot = x_dot + self.tau * xacc
-            theta = theta + self.tau * theta_dot
-            theta_dot = theta_dot + self.tau * thetaacc
-        else:  # semi-implicit euler
-            x_dot = x_dot + self.tau * xacc
-            x = x + self.tau * x_dot
-            theta_dot = theta_dot + self.tau * thetaacc
-            theta = theta + self.tau * theta_dot
-
-        # Normalize theta to be between [-pi and pi].
-        theta = (math.pi + theta) % (2*math.pi) - math.pi
-
-        x_bounded = min(self.x_threshold, max(x, -self.x_threshold))
-        # We'll want to remove this, but for now we cannot.
-        # if x != x_bounded:
-        #     print("left the x bounds")
-        x = x_bounded
-
-        self.state = (x, x_dot, theta, theta_dot)
-
-        should_have_terminated = bool(
-            x < -self.x_threshold
-            or x > self.x_threshold
-            or theta < -self.theta_threshold_radians
-            or theta > self.theta_threshold_radians
-        )
         terminated = False   # This variant never terminates.
 
-        reward = self._reward_fn(self.state, should_have_terminated)
+        if self.should_have_terminated:
+            # We are in an absorbing state, no changes to the state or rewards.
+            pass
+        else:
+            x, x_dot, theta, theta_dot = self.state
+            force = self.force_mag if action == 1 else -self.force_mag
+            costheta = math.cos(theta)
+            sintheta = math.sin(theta)
+
+            # For the interested reader:
+            # https://coneural.org/florian/papers/05_cart_pole.pdf
+            temp = (
+                force + self.polemass_length * theta_dot**2 * sintheta
+            ) / self.total_mass
+            thetaacc = (self.gravity * sintheta - costheta * temp) / (
+                self.length * (4.0 / 3.0 - self.masspole * costheta**2 / self.total_mass)
+            )
+            xacc = temp - self.polemass_length * thetaacc * costheta / self.total_mass
+
+            if self.kinematics_integrator == "euler":
+                x = x + self.tau * x_dot
+                x_dot = x_dot + self.tau * xacc
+                theta = theta + self.tau * theta_dot
+                theta_dot = theta_dot + self.tau * thetaacc
+            else:  # semi-implicit euler
+                x_dot = x_dot + self.tau * xacc
+                x = x + self.tau * x_dot
+                theta_dot = theta_dot + self.tau * thetaacc
+                theta = theta + self.tau * theta_dot
+
+            # Normalize theta to be between [-pi and pi].
+            theta = (math.pi + theta) % (2*math.pi) - math.pi
+
+            # x_bounded = min(self.x_threshold, max(x, -self.x_threshold))
+            # We'll want to remove this, but for now we cannot.
+            # if x != x_bounded:
+            #     print("left the x bounds")
+            # x = x_bounded
+
+            self.state = (x, x_dot, theta, theta_dot)
+
+            self.should_have_terminated = bool(
+                x < -self.x_threshold
+                or x > self.x_threshold
+                or theta < -self.theta_threshold_radians
+                or theta > self.theta_threshold_radians
+            )
+
+        if self._terminating_variant:
+            terminated = self.should_have_terminated
 
         if not terminated:
             pass
@@ -247,6 +260,9 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
                     "True' -- any further steps are undefined behavior."
                 )
             self.steps_beyond_terminated += 1
+
+
+        reward = self._reward_fn(self.state)
 
         if self.render_mode == "human":
             self.render()
@@ -276,35 +292,35 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             )  # default high
             self.state = self.np_random.uniform(low=low, high=high, size=(4,))
         self.steps_beyond_terminated = None
+        self.should_have_terminated = False
 
         if self.render_mode == "human":
             self.render()
         return np.array(self.state, dtype=np.float32), {}
 
-    def _discrete_reward(
-            self, state, should_have_terminated):
+    def _discrete_reward(self, state):
         """The original."""
-        if not should_have_terminated:
+        if not self.should_have_terminated or self._terminating_variant:
+            # In the terminating variant, every single step is reward=1.
             return 1.0
         else:
             return 0.0
 
-    def _continuous_reward(
-            self, state, should_have_terminated):
+    def _continuous_reward(self, state):
         """A reward that slowly varies with the state."""
         # return math.exp(-20 * state[2]**2)
-        return ((np.cos(state[2])+1.0)/2.0)**4
-        # if not should_have_terminated:
-        #     theta = state[2]
-        #     if (theta < -self.theta_threshold_radians or
-        #         theta > self.theta_threshold_radians):
-        #         return 0.0
-        #     else:
-        #         return math.sqrt(
-        #             (self.theta_threshold_radians ** 2 - theta ** 2) 
-        #             / (self.theta_threshold_radians ** 2))
-        # else:
-        #     return 0.0
+        # return ((np.cos(state[2])+1.0)/2.0)**4
+        if not self.should_have_terminated:
+            theta = state[2]
+            if (theta < -self.theta_threshold_radians or
+                theta > self.theta_threshold_radians):
+                return 0.0
+            else:
+                return math.sqrt(
+                    (self.theta_threshold_radians ** 2 - theta ** 2) 
+                    / (self.theta_threshold_radians ** 2))
+        else:
+            return 0.0
 
 
     def render(self):
