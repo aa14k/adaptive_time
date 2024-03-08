@@ -26,6 +26,24 @@ def _integrate_with_quadrature(rewards, quadrature_fn, tolerance):
     return integral, np.array(pivots, dtype=np.int32)
 
 
+class AdaptiveQuadratureIntegratorNew(AproxIntegrator):
+    """TODO describe."""
+
+    def __init__(self, tolerance: float, print_debug: bool = False) -> None:
+        super().__init__()
+        self._tolerance = tolerance
+        self.print_debug = print_debug
+    
+    def integrate(self, rewards) -> Tuple[float, np.ndarray]:
+        integral = adaptive(rewards, 0, len(rewards)-1, self._tolerance)
+        return integral, np.array([0]*100, dtype=np.int32)
+
+        # integrate_fn = functools.partial(
+        #     adaptive_approx_integrate, print_debug=self.print_debug)
+        # return _integrate_with_quadrature(
+        #     rewards, integrate_fn, self._tolerance)
+
+
 class AdaptiveQuadratureIntegrator(AproxIntegrator):
     """Identifies pivots using quadrature methods, access to total sum."""
 
@@ -270,3 +288,34 @@ def _trapezoid_approx(xs, idxes):
 
     # print(f"- trap  Q: {Q};   from\n{xs}")
     return Q
+
+
+def simpsons_rule(ys,a,b):
+    h = (b - a) / 3
+    if h <= 1:
+        return sum(ys[a:b])
+    def f(x):
+        return ys[int(x)]
+    return 3 * h / 8 * (f(a) + 3 * f(a + h) + 3 * f(a + 2 * h) + f(b))
+
+def Newton_Cotes(a,b):
+    return (a + b) / 2
+
+def adaptive(ys, a, b, tol):
+    if b - a <= 2:  # Adjust later.
+        return np.sum(ys[a:b])
+    c = Newton_Cotes(a,b)
+    c = int(np.floor(c))
+    assert c != a and c != b, f"adaptive: c={c} a={a} b={b}"
+
+    Sab = simpsons_rule(ys,a,b)
+    Sac = simpsons_rule(ys,a,c)
+    Scb = simpsons_rule(ys,c,b)
+    Q = Sac + Scb
+    if np.abs(Sab - Q) > tol:
+        Q = adaptive(ys, a,c,tol / 2) + adaptive(ys, c,b,tol / 2)
+    return Q
+
+
+
+# def approx_int_new(xs, tol, idxes):
