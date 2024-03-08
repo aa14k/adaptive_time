@@ -4,6 +4,7 @@ Follows the example from https://stackoverflow.com/a/48414195.
 """
 
 import sys,os
+import copy
 
 from tqdm import tqdm
 from adaptive_time import utils
@@ -16,30 +17,35 @@ def main(argv):
     utils.set_directory_in_project()
 
     # Static settings.
-    generate_new_data=False
-    save_new_data=False
-    num_runs=30
-    sample_budget=1000000
-    base_args = (
-        "run_cartpole.py "
-        f"--generate_new_data {generate_new_data} "
-        f"--save_new_data {save_new_data} "
-        f"--num_runs {num_runs} "
-        f"--sample_budget {sample_budget}")
+    base_config = {
+        "generate_new_data": False,
+        "save_new_data": True,
+        # "generate_new_data": True,
+        # "save_new_data": True,
+        "num_runs": 30,
+        "sample_budget": 1_000_000,
+        "discrete_reward": True,
+        "terminate_env": True,
+    }
 
     # Orig code:
     # configs = [' '.join(argv)]
 
-    # configs = [base_args]
     # Dynamic settings.
-    configs = []
+    search_configs = []
     for a in itertools.product([False, True],repeat=2):
-        config = f"--discrete_reward {a[0]} --terminate_env {a[1]}"
-        configs.append(f"{base_args} {config}")    
+        config = {"discrete_reward": a[0], "terminate_env": a[1]}
+        search_configs.append(config)
+    # search_configs = [{}]
 
-    for config in tqdm(configs):
+    for config in tqdm(search_configs):
+        cc = copy.deepcopy(base_config)
+        cc.update(config)
+        # Turn it into a flag string string.
+        args = 'run_cartpole.py ' + ' '.join([f"--{k} {v}" for k,v in cc.items()])
+        print("Run:", args)
         with open(CONFIG_FILENAME,'w') as f:
-            f.write(config)
+            f.write(args)
         os.system('jupyter nbconvert --execute {:s} --to html'.format(IPYNB_FILENAME))
     return None
 
