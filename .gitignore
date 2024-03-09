@@ -5,6 +5,7 @@
 results/
 .tmp_config_ipynb
 code/adaptive_time/notebooks/value_estimation.html
+classic_control_data
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks

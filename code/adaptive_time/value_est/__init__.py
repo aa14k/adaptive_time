@@ -1,7 +1,7 @@
 
 import numpy as np
 import random
-
+from adaptive_time.environments import cartpole2
 
 def reset_randomness(seed, env):
     """Resets all randomness, except for the environment's seed."""
@@ -40,7 +40,10 @@ def generate_trajectory(
         * is_early_terminated is a boolean indicating if the trajectory was
             terminated early due to `max_steps`.
     """
-    observation, _ = env.reset(seed=seed, start_state=start_state)
+    if isinstance(env, cartpole2.CartPoleEnv):
+        observation, _ = env.reset(seed=seed, start_state=start_state)
+    else:
+        observation, _ = env.reset(seed=seed)
     trajectory = []
     terminated = False
     steps = 0
