@@ -31,6 +31,7 @@ class AdaptiveQuadratureIntegratorNew(AproxIntegrator):
 
     def __init__(self, tolerance: float) -> None:
         super().__init__()
+        raise NotImplementedError("This is not bug-free yet!!!")
         self._tolerance = tolerance
     
     def integrate(self, rewards) -> Tuple[float, np.ndarray]:
@@ -284,7 +285,9 @@ def _trapezoid_approx(xs, idxes):
     return Q
 
 
-def simpsons_rule(ys,a,b, used_idxes):
+def simpsons_rule(ys,a,b, used_idxes, print_debug=False):
+    if print_debug:
+        print("simpsons_rule: ", a, b)
     # NOTE: b is included in the sum!!
     h = (b - a) / 3
     if h <= 1:
@@ -293,16 +296,27 @@ def simpsons_rule(ys,a,b, used_idxes):
         return sum(ys[a:b+1])
     def f(x):
         return ys[int(x)]
+    used_idxes[f(a)] = 1
+    used_idxes[f(a+h)] = 1
+    used_idxes[f(a+2*h)] = 1
+    used_idxes[f(b)] = 1
+    if print_debug:
+        print("looking at: ", f(a), f(a+h), f(a+2*h), f(b))
     return 3 * h / 8 * (f(a) + 3 * f(a + h) + 3 * f(a + 2 * h) + f(b))
 
 def Newton_Cotes(a,b):
     return (a + b) / 2
 
 def adaptive(ys, a, b, tol, used_idxes, print_debug=False):
+    if print_debug:
+        print("adaptive: ", a, b)
     # NOTE: b is included in the sum!!
+    # used_idxes[a] = 1
+    # used_idxes[b] = 1
     if b - a <= 1:  # Base case: up to 2 elements.
-        used_idxes[a] = 1
-        used_idxes[b] = 1
+        if print_debug:
+            print("adaptive: base case")
+        # TODO: mark a and b!
         return np.sum(ys[a:b+1])
     c = Newton_Cotes(a,b)
     c = int(np.floor(c))

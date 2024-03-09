@@ -25,7 +25,8 @@ class ProcData(NamedTuple):
 
 # Could maybe do a variant of this without specifying y_label?
 def process_across_runs(
-        dict_of_multiple_runs, x_label: str, y_label: str, right=None
+        dict_of_multiple_runs, x_label: str, y_label: str, right=None,
+        interp_step=1000, tqdm=None
 ) -> ProcData:
     """"Interpolates and stacks the x vs y, returning means and stderrs, too.
     
@@ -42,14 +43,18 @@ def process_across_runs(
     We ensure that the data is interpolated with respect to this label. See
     an example (test or in a notebook) for the usage.
     """
+    if tqdm is None:
+        tqdm = lambda x: x
+
     max_x_value = max(
         max(run[x_label][-1] for run in runs)
         for runs in dict_of_multiple_runs.values())
-    all_x_values = np.arange(0, max_x_value+1)   # x-axis for the interpolation
+    all_x_values = np.arange(0, max_x_value+1, step=interp_step)   # x-axis for the interpolation
 
+    print("interpolating")
     num_runs = len(next(iter(dict_of_multiple_runs.values())))
     interpolated_results = {}  # Each element will be a numpy array
-    for name, stats_for_runs in dict_of_multiple_runs.items():
+    for name, stats_for_runs in tqdm(dict_of_multiple_runs.items()):
         interpolated_results[name] = np.zeros((len(stats_for_runs), len(all_x_values)))
         for run_idx, run in enumerate(stats_for_runs):
             length = min(len(run[x_label]), len(run[y_label]))
@@ -60,7 +65,8 @@ def process_across_runs(
 
     all_y_means = {}
     all_y_stderrs = {}
-    for name, res in interpolated_results.items():
+    print("finding means and stderrs")
+    for name, res in tqdm(interpolated_results.items()):
         all_y_means[name] = np.nanmean(res, axis=0)
         all_y_stderrs[name] =  np.nanstd(res, axis=0) / np.sqrt(num_runs)
 
