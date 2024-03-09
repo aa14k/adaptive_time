@@ -26,6 +26,19 @@ def _integrate_with_quadrature(rewards, quadrature_fn, tolerance):
     return integral, np.array(pivots, dtype=np.int32)
 
 
+class AdaptiveQuadratureIntegratorNew(AproxIntegrator):
+    """TODO describe."""
+
+    def __init__(self, tolerance: float) -> None:
+        super().__init__()
+        raise NotImplementedError("This is not bug-free yet!!!")
+        self._tolerance = tolerance
+    
+    def integrate(self, rewards) -> Tuple[float, np.ndarray]:
+        return _integrate_with_quadrature(
+            rewards, adaptive_top_level, self._tolerance)
+
+
 class AdaptiveQuadratureIntegrator(AproxIntegrator):
     """Identifies pivots using quadrature methods, access to total sum."""
 
@@ -33,12 +46,12 @@ class AdaptiveQuadratureIntegrator(AproxIntegrator):
         super().__init__()
         self._tolerance = tolerance
         self.print_debug = print_debug
+        self._integrate_fn = functools.partial(
+            adaptive_approx_integrate, print_debug=self.print_debug)
     
     def integrate(self, rewards) -> Tuple[float, np.ndarray]:
-        integrate_fn = functools.partial(
-            adaptive_approx_integrate, print_debug=self.print_debug)
         return _integrate_with_quadrature(
-            rewards, integrate_fn, self._tolerance)
+            rewards, self._integrate_fn, self._tolerance)
 
 
 class AdaptiveQuadratureIntegratorOld(AproxIntegrator):
@@ -270,3 +283,59 @@ def _trapezoid_approx(xs, idxes):
 
     # print(f"- trap  Q: {Q};   from\n{xs}")
     return Q
+
+
+def simpsons_rule(ys,a,b, used_idxes, print_debug=False):
+    if print_debug:
+        print("simpsons_rule: ", a, b)
+    # NOTE: b is included in the sum!!
+    h = (b - a) / 3
+    if h <= 1:
+        for i in range(a,b+1):
+            used_idxes[i] = 1
+        return sum(ys[a:b+1])
+    def f(x):
+        return ys[int(x)]
+    used_idxes[f(a)] = 1
+    used_idxes[f(a+h)] = 1
+    used_idxes[f(a+2*h)] = 1
+    used_idxes[f(b)] = 1
+    if print_debug:
+        print("looking at: ", f(a), f(a+h), f(a+2*h), f(b))
+    return 3 * h / 8 * (f(a) + 3 * f(a + h) + 3 * f(a + 2 * h) + f(b))
+
+def Newton_Cotes(a,b):
+    return (a + b) / 2
+
+def adaptive(ys, a, b, tol, used_idxes, print_debug=False):
+    if print_debug:
+        print("adaptive: ", a, b)
+    # NOTE: b is included in the sum!!
+    # used_idxes[a] = 1
+    # used_idxes[b] = 1
+    if b - a <= 1:  # Base case: up to 2 elements.
+        if print_debug:
+            print("adaptive: base case")
+        # TODO: mark a and b!
+        return np.sum(ys[a:b+1])
+    c = Newton_Cotes(a,b)
+    c = int(np.floor(c))
+    assert c != a and c != b, f"adaptive: c={c} a={a} b={b}"
+
+    Sab = simpsons_rule(ys,a,b, used_idxes)
+    Sac = simpsons_rule(ys,a,c, used_idxes)
+    Scb = simpsons_rule(ys,c,b, used_idxes)
+    Q = Sac + Scb - ys[c]   # Remove the double-counted c.
+    if np.abs(Sab - Q) > tol:
+        Q = (adaptive(ys, a,c,tol / 2, used_idxes)
+             + adaptive(ys, c,b,tol / 2, used_idxes)
+             - ys[c])  # Remove the double-counted c.
+    return Q
+
+
+def adaptive_top_level(rewards_with_idxs, tolerance, used_idxes, print_debug=False):
+    rewards = rewards_with_idxs[0]  # we'll just pass the full array.
+    return adaptive(rewards, 0, len(rewards)-1, tolerance, used_idxes, print_debug)
+
+
+# def approx_int_new(xs, tol, idxes):

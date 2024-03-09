@@ -77,39 +77,59 @@ def simulate_learning(
     if tqdm is None:
         tqdm = lambda x: x
 
-    estimated_values_by_episode = {}
-    number_of_pivots_by_episode = {}
-    all_values_by_episode = {}
+    update_in_batches_of = 100_000
 
     for sampler_name, sampler in tqdm(samplers_tried.items()):
         print("sampler_name:", sampler_name)
         data[sampler_name] = []
 
-        for run_idx in range(num_runs):
+        for run_idx in tqdm(range(num_runs)):
             # Main idea: update the value estimate with new samples
             # until we run out of budget.
             used_updates = 0
-            value_estimate = 0
-            num_samples = 0
+            # value_estimate = 0
+            # num_traj_samples = 0
             cur_data = {
-                "values_of_trajs": [],  # Instantaneous values.
-                "running_v_estimate": [],  # Running value estimates.
-                "total_pivots": [],  # Total pivots used for the estimate.
+                "values_of_trajs": np.array([]),  # Instantaneous values.
+                "pivots_of_trajs": np.array([]),  # Pivots used for the estimate.
+                # "running_v_estimate": [],  # Running value estimates.
+                # "total_pivots": [],  # Total pivots used for the estimate.
             }
 
             while used_updates < update_budget:
-                num_samples += 1
-                start_state = np.random.choice(num_trajs, p=start_state_weights)
-                val_sample = approx_integrals[sampler_name][start_state]
-                cur_data["values_of_trajs"].append(val_sample)
-                
-                value_estimate += (1.0/num_samples) * (val_sample - value_estimate)
-                used_updates += num_pivots[sampler_name][start_state]
+                # Do updates with np for a batch of 10_000 samples so
+                # we can calculate this fast.
 
-                cur_data["running_v_estimate"].append(value_estimate)
-                cur_data["total_pivots"].append(used_updates)
+                sampled_start_states = np.random.choice(
+                    num_trajs, size=(update_in_batches_of,), p=start_state_weights)
+
+                cur_values = approx_integrals[sampler_name][sampled_start_states]
+                cur_pivots = num_pivots[sampler_name][sampled_start_states]
+                cur_data["values_of_trajs"] = np.concatenate(
+                    (cur_data["values_of_trajs"], cur_values))
+                cur_data["pivots_of_trajs"] = np.concatenate(    
+                    (cur_data["pivots_of_trajs"], cur_pivots))
+
+                used_updates += np.sum(cur_pivots)
+                # num_traj_samples += 1
+                # start_state = np.random.choice(num_trajs, p=start_state_weights)
+                # val_sample = approx_integrals[sampler_name][start_state]
+                # cur_data["values_of_trajs"].append(val_sample)
+                
+                # value_estimate += (1.0/num_traj_samples) * (val_sample - value_estimate)
+                # used_updates += num_pivots[sampler_name][start_state]
+
+                # cur_data["running_v_estimate"].append(value_estimate)
+                # cur_data["total_pivots"].append(used_updates)
             
-            data[sampler_name].append(cur_data)
+            running_value_est = (
+                np.cumsum(cur_data["values_of_trajs"])
+                / np.arange(1, len(cur_data["values_of_trajs"]) + 1))
+            data_to_store = {
+                "running_v_estimate": running_value_est,
+                "total_pivots": np.cumsum(cur_data["pivots_of_trajs"]),
+            }
+            data[sampler_name].append(data_to_store)
 
     return data
 
