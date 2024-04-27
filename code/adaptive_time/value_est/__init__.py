@@ -40,8 +40,12 @@ def generate_trajectory(
         * is_early_terminated is a boolean indicating if the trajectory was
             terminated early due to `max_steps`.
     """
-    if isinstance(env, cartpole2.CartPoleEnv):
-        observation, _ = env.reset(seed=seed, start_state=start_state)
+    if start_state is not None:
+        try:
+            observation, _ = env.reset(seed=seed, start_state=start_state)
+        except TypeError:
+            print("start_state is specified, but the environment does not support it!")
+            raise
     else:
         observation, _ = env.reset(seed=seed)
     trajectory = []
